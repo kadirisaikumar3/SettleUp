@@ -63,8 +63,13 @@ const updateGroupMembers = async (groupId, members) => {
   return group.populate("members", "name email");
 };
 
+const getAllGroups = async () => {
+  return Group.find().populate("members", "name email").sort({ createdAt: 1 });
+};
+
 module.exports = {
   createGroup,
+  getAllGroups,
   getGroupById,
   updateGroupMembers,
 };

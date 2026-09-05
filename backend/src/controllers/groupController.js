@@ -23,6 +23,22 @@ const createGroup = async (req, res) => {
   }
 };
 
+const getAllGroups = async (req, res) => {
+  try {
+    const groups = await groupService.getAllGroups();
+
+    res.status(200).json({
+      status: "success",
+      data: groups,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+};
+
 const getGroupById = async (req, res) => {
   try {
     const group = await groupService.getGroupById(req.params.id);
@@ -60,6 +76,7 @@ const updateGroupMembers = async (req, res) => {
 
 module.exports = {
   createGroup,
+  getAllGroups,
   getGroupById,
   updateGroupMembers,
 };
