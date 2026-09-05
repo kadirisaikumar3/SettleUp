@@ -6,11 +6,33 @@ const {
   updateGroupMembers,
 } = require("../controllers/groupController");
 
+const {
+  createExpense,
+  getGroupExpenses,
+} = require("../controllers/expenseController");
+
+const { getGroupSettlement } = require("../controllers/settlementController");
+
 const router = express.Router();
 
 router.post("/", createGroup);
 
 router.put("/:id/members", updateGroupMembers);
+
+router.post("/:id/expenses", (req, res) => {
+  req.body.groupId = req.params.id;
+  createExpense(req, res);
+});
+
+router.get("/:id/expenses", (req, res) => {
+  req.params.groupId = req.params.id;
+  getGroupExpenses(req, res);
+});
+
+router.get("/:id/settlement", (req, res) => {
+  req.params.groupId = req.params.id;
+  getGroupSettlement(req, res);
+});
 
 router.get("/:id", getGroupById);
 
