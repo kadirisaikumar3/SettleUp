@@ -93,6 +93,53 @@ const getGroupSettlement = async (groupId) => {
   };
 };
 
+const getGroupBalances = async (groupId) => {
+  const group = await Group.findById(groupId).populate("members", "name email");
+
+  if (!group) {
+    throw new Error("Group not found");
+  }
+
+  const groups = await Group.find();
+
+  const expenses = await Expense.find().sort({ createdAt: 1 });
+
+  const algorithmGroups = groups.map((currentGroup) => ({
+    id: currentGroup._id.toString(),
+    parentGroupId: currentGroup.parentGroupId
+      ? currentGroup.parentGroupId.toString()
+      : null,
+  }));
+
+  const algorithmExpenses = expenses.map((expense) => ({
+    id: expense._id.toString(),
+    groupId: expense.groupId.toString(),
+    paidBy: expense.paidBy.toString(),
+    amount: expense.amount,
+    splitAmong: expense.splitAmong.map((userId) => userId.toString()),
+  }));
+
+  const groupExpenses = collectGroupExpenses(
+    groupId,
+    algorithmGroups,
+    algorithmExpenses,
+  );
+
+  const balances = calculateBalances(groupExpenses);
+
+  return group.members.map((member) => {
+    const userId = member._id.toString();
+
+    return {
+      userId,
+      name: member.name,
+      email: member.email,
+      balance: Math.round((balances.get(userId) || 0) * 100) / 100,
+    };
+  });
+};
+
 module.exports = {
   getGroupSettlement,
+  getGroupBalances,
 };

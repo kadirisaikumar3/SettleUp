@@ -11,7 +11,10 @@ const {
   getGroupExpenses,
 } = require("../controllers/expenseController");
 
-const { getGroupSettlement } = require("../controllers/settlementController");
+const {
+  getGroupSettlement,
+  getGroupBalances,
+} = require("../controllers/settlementController");
 
 const router = express.Router();
 
@@ -27,6 +30,11 @@ router.post("/:id/expenses", (req, res) => {
 router.get("/:id/expenses", (req, res) => {
   req.params.groupId = req.params.id;
   getGroupExpenses(req, res);
+});
+
+router.get("/:id/balances", (req, res) => {
+  req.params.groupId = req.params.id;
+  getGroupBalances(req, res);
 });
 
 router.get("/:id/settlement", (req, res) => {

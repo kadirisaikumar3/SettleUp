@@ -18,6 +18,25 @@ const getGroupSettlement = async (req, res) => {
   }
 };
 
+const getGroupBalances = async (req, res) => {
+  try {
+    const balances = await settlementService.getGroupBalances(
+      req.params.groupId,
+    );
+
+    res.status(200).json({
+      status: "success",
+      data: balances,
+    });
+  } catch (error) {
+    res.status(404).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   getGroupSettlement,
+  getGroupBalances,
 };
