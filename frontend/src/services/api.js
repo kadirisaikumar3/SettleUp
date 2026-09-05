@@ -43,4 +43,10 @@ export const getGroupSettlement = async (groupId) => {
   return apiRequest(`/groups/${groupId}/settlement`);
 };
 
+export const createExpense = async (expenseData) =>
+  apiRequest("/expenses", {
+    method: "POST",
+    body: JSON.stringify(expenseData),
+  });
+
 export default apiRequest;
