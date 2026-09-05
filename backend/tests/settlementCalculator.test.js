@@ -74,4 +74,32 @@ describe("calculateSettlements", () => {
 
     expect(totalSettled).toBe(100.5);
   });
+
+  test("should preserve the balance of every user after applying settlements", () => {
+    const balances = new Map([
+      ["Sai", 1400],
+      ["Deepa", 50],
+      ["Siri", -1450],
+    ]);
+
+    const settlements = calculateSettlements(balances);
+
+    const finalBalances = new Map(balances);
+
+    for (const settlement of settlements) {
+      finalBalances.set(
+        settlement.from,
+        finalBalances.get(settlement.from) + settlement.amount,
+      );
+
+      finalBalances.set(
+        settlement.to,
+        finalBalances.get(settlement.to) - settlement.amount,
+      );
+    }
+
+    for (const balance of finalBalances.values()) {
+      expect(Math.abs(balance)).toBeLessThanOrEqual(0.01);
+    }
+  });
 });
