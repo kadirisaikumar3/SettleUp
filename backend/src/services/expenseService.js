@@ -1,14 +1,26 @@
 const Expense = require("../models/Expense");
+
 const Group = require("../models/Group");
+
 const User = require("../models/User");
 
-const createExpense = async ({ groupId, paidBy, amount, splitAmong }) => {
+const createExpense = async ({
+  groupId,
+  paidBy,
+  description,
+  amount,
+  splitAmong,
+}) => {
   if (!groupId) {
     throw new Error("Group ID is required");
   }
 
   if (!paidBy) {
     throw new Error("Payer is required");
+  }
+
+  if (!description || !description.trim()) {
+    throw new Error("Expense description is required");
   }
 
   if (!amount || amount <= 0) {
@@ -48,6 +60,7 @@ const createExpense = async ({ groupId, paidBy, amount, splitAmong }) => {
   const expense = await Expense.create({
     groupId,
     paidBy,
+    description: description.trim(),
     amount,
     splitAmong,
   });

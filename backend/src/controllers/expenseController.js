@@ -2,11 +2,12 @@ const expenseService = require("../services/expenseService");
 
 const createExpense = async (req, res) => {
   try {
-    const { groupId, paidBy, amount, splitAmong } = req.body;
+    const { groupId, paidBy, description, amount, splitAmong } = req.body;
 
     const expense = await expenseService.createExpense({
       groupId,
       paidBy,
+      description,
       amount,
       splitAmong,
     });
