@@ -74,9 +74,33 @@ const updateGroupMembers = async (req, res) => {
   }
 };
 
+const updateGroup = async (req, res) => {
+  try {
+    const { name, members, parentGroupId } = req.body;
+
+    const group = await groupService.updateGroup(req.params.id, {
+      name,
+      members,
+      parentGroupId,
+    });
+
+    res.status(200).json({
+      status: "success",
+      message: "Group updated successfully",
+      data: group,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   createGroup,
   getAllGroups,
   getGroupById,
   updateGroupMembers,
+  updateGroup,
 };

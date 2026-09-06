@@ -8,6 +8,7 @@ import {
   getUsers,
   createExpense,
   createGroup,
+  updateGroup,
 } from "./services/api";
 
 import "./App.css";
@@ -31,6 +32,18 @@ function App() {
     parentGroupId: "",
     members: [],
   });
+
+  const [showEditGroupForm, setShowEditGroupForm] = useState(false);
+
+  const [editGroupForm, setEditGroupForm] = useState({
+    name: "",
+    parentGroupId: "",
+    members: [],
+  });
+
+  const [editGroupSubmitting, setEditGroupSubmitting] = useState(false);
+  const [editGroupError, setEditGroupError] = useState("");
+  const [editGroupSuccess, setEditGroupSuccess] = useState("");
 
   const [expenseForm, setExpenseForm] = useState({
     description: "",
@@ -140,6 +153,24 @@ function App() {
   // Helpers
   // --------------------------------------------------
 
+  const isDescendantOf = (groupId, ancestorId) => {
+    let currentGroup = groups.find(
+      (group) => String(group._id) === String(groupId),
+    );
+
+    while (currentGroup?.parentGroupId) {
+      if (String(currentGroup.parentGroupId) === String(ancestorId)) {
+        return true;
+      }
+
+      currentGroup = groups.find(
+        (group) => String(group._id) === String(currentGroup.parentGroupId),
+      );
+    }
+
+    return false;
+  };
+
   const handleCreateGroup = async () => {
     setError("");
 
@@ -173,6 +204,45 @@ function App() {
       setShowGroupForm(false);
     } catch (err) {
       setError(err.message || "Failed to create group.");
+    }
+  };
+
+  const handleUpdateGroup = async () => {
+    if (!selectedGroup) {
+      return;
+    }
+
+    if (!editGroupForm.name.trim()) {
+      setEditGroupError("Group name is required");
+      return;
+    }
+
+    if (editGroupForm.parentGroupId === selectedGroup._id) {
+      setEditGroupError("A group cannot be its own parent");
+      return;
+    }
+
+    try {
+      setEditGroupSubmitting(true);
+      setEditGroupError("");
+      setEditGroupSuccess("");
+
+      await updateGroup(selectedGroup._id, {
+        name: editGroupForm.name,
+        members: editGroupForm.members,
+        parentGroupId: editGroupForm.parentGroupId || null,
+      });
+
+      setEditGroupSuccess("Group updated successfully");
+
+      setShowEditGroupForm(false);
+
+      const response = await getGroups();
+      setGroups(response.data || []);
+    } catch (err) {
+      setEditGroupError(err.message || "Failed to update group");
+    } finally {
+      setEditGroupSubmitting(false);
     }
   };
 
@@ -492,6 +562,32 @@ function App() {
                   type="button"
                   className="add-expense-button"
                   onClick={() => {
+                    if (!selectedGroup) {
+                      return;
+                    }
+
+                    setEditGroupForm({
+                      name: selectedGroup.name || "",
+                      parentGroupId: selectedGroup.parentGroupId || "",
+                      members:
+                        selectedGroup.members?.map((member) => member._id) ||
+                        [],
+                    });
+
+                    setEditGroupError("");
+                    setEditGroupSuccess("");
+                    setShowEditGroupForm(true);
+                    setShowGroupForm(false);
+                    setShowExpenseForm(false);
+                  }}
+                >
+                  ✎ Edit Group
+                </button>
+
+                <button
+                  type="button"
+                  className="add-expense-button"
+                  onClick={() => {
                     setShowGroupForm(true);
                     setError("");
                   }}
@@ -632,6 +728,136 @@ function App() {
                       onClick={handleCreateGroup}
                     >
                       Create Group
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Edit Group Form */}
+            {showEditGroupForm && (
+              <div className="expense-form-card">
+                <div className="expense-form-header">
+                  <div>
+                    <span className="eyebrow">EDIT GROUP</span>
+                    <h3>Edit group</h3>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="expense-cancel-button"
+                    onClick={() => {
+                      setShowEditGroupForm(false);
+                      setEditGroupError("");
+                      setEditGroupSuccess("");
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+
+                <div className="expense-form-body">
+                  <label className="form-field">
+                    <span>Group name</span>
+
+                    <input
+                      type="text"
+                      placeholder="Enter group name"
+                      value={editGroupForm.name}
+                      onChange={(event) =>
+                        setEditGroupForm({
+                          ...editGroupForm,
+                          name: event.target.value,
+                        })
+                      }
+                    />
+                  </label>
+
+                  <label className="form-field">
+                    <span>Parent group</span>
+
+                    <select
+                      value={editGroupForm.parentGroupId}
+                      onChange={(event) =>
+                        setEditGroupForm({
+                          ...editGroupForm,
+                          parentGroupId: event.target.value,
+                        })
+                      }
+                    >
+                      <option value="">No parent — Root group</option>
+
+                      {groups
+                        .filter(
+                          (group) =>
+                            group._id !== selectedGroup?._id &&
+                            !isDescendantOf(group._id, selectedGroup?._id),
+                        )
+                        .map((group) => (
+                          <option key={group._id} value={group._id}>
+                            {group.name}
+                          </option>
+                        ))}
+                    </select>
+                  </label>
+
+                  <div className="form-field">
+                    <span>Members</span>
+
+                    <div className="member-checkbox-list">
+                      {users.map((user) => (
+                        <label key={user._id} className="member-checkbox">
+                          <input
+                            type="checkbox"
+                            checked={editGroupForm.members.includes(user._id)}
+                            onChange={(event) => {
+                              const userId = user._id;
+
+                              setEditGroupForm((currentForm) => ({
+                                ...currentForm,
+                                members: event.target.checked
+                                  ? [...currentForm.members, userId]
+                                  : currentForm.members.filter(
+                                      (id) => id !== userId,
+                                    ),
+                              }));
+                            }}
+                          />
+
+                          <span>{user.name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {editGroupError && (
+                    <p className="form-error">{editGroupError}</p>
+                  )}
+
+                  {editGroupSuccess && (
+                    <p className="form-success">{editGroupSuccess}</p>
+                  )}
+
+                  <div className="expense-form-actions">
+                    <button
+                      type="button"
+                      className="expense-cancel-button"
+                      onClick={() => {
+                        setShowEditGroupForm(false);
+                        setEditGroupError("");
+                        setEditGroupSuccess("");
+                      }}
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      type="button"
+                      className="add-expense-button"
+                      disabled={editGroupSubmitting}
+                      onClick={handleUpdateGroup}
+                    >
+                      {editGroupSubmitting ? "Saving..." : "Save Changes"}
                     </button>
                   </div>
                 </div>

@@ -34,6 +34,12 @@ export const createGroup = async (groupData) => {
   });
 };
 
+export const updateGroup = async (groupId, groupData) =>
+  apiRequest(`/groups/${groupId}`, {
+    method: "PUT",
+    body: JSON.stringify(groupData),
+  });
+
 export const getGroup = async (groupId) => {
   return apiRequest(`/groups/${groupId}`);
 };
