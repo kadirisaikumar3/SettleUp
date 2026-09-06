@@ -602,12 +602,7 @@ function App() {
               <div className="stat-card">
                 <span className="stat-label">TOTAL EXPENSE</span>
                 <strong>
-                  {formatAmount(
-                    expenses.reduce(
-                      (total, expense) => total + Number(expense.amount || 0),
-                      0,
-                    ),
-                  )}
+                  {formatAmount(settlement?.totalExpense)}
                 </strong>
               </div>
             </div>

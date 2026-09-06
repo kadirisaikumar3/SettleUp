@@ -42,6 +42,11 @@ const getGroupSettlement = async (groupId) => {
     algorithmExpenses,
   );
 
+  const totalExpense =
+    Math.round(
+      groupExpenses.reduce((total, expense) => total + expense.amount, 0) * 100,
+    ) / 100;
+
   // Calculate balances using expenses collected by DFS
   const balances = calculateBalances(groupExpenses);
 
@@ -88,6 +93,7 @@ const getGroupSettlement = async (groupId) => {
       id: group._id,
       name: group.name,
     },
+    totalExpense,
     balances: balanceDetails,
     settlements: settlementDetails,
   };
