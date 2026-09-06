@@ -40,6 +40,11 @@ export const updateGroup = async (groupId, groupData) =>
     body: JSON.stringify(groupData),
   });
 
+export const deleteGroup = async (groupId) =>
+  apiRequest(`/groups/${groupId}`, {
+    method: "DELETE",
+  });
+
 export const getGroup = async (groupId) => {
   return apiRequest(`/groups/${groupId}`);
 };

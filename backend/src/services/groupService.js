@@ -1,5 +1,6 @@
 const Group = require("../models/Group");
 const User = require("../models/User");
+const Expense = require("../models/Expense");
 
 const createGroup = async ({ name, members = [], parentGroupId = null }) => {
   if (!name || !name.trim()) {
@@ -132,10 +133,41 @@ const getAllGroups = async () => {
   return Group.find().populate("members", "name email").sort({ createdAt: 1 });
 };
 
+const deleteGroup = async (groupId) => {
+  const group = await Group.findById(groupId);
+
+  if (!group) {
+    throw new Error("Group not found");
+  }
+
+  const childGroup = await Group.findOne({
+    parentGroupId: groupId,
+  });
+
+  if (childGroup) {
+    throw new Error("Cannot delete a group that has child groups");
+  }
+
+  const expense = await Expense.findOne({
+    groupId,
+  });
+
+  if (expense) {
+    throw new Error("Cannot delete a group that has expenses");
+  }
+
+  await Group.findByIdAndDelete(groupId);
+
+  return {
+    message: "Group deleted successfully",
+  };
+};
+
 module.exports = {
   createGroup,
   getAllGroups,
   getGroupById,
   updateGroupMembers,
   updateGroup,
+  deleteGroup,
 };

@@ -9,6 +9,7 @@ import {
   createExpense,
   createGroup,
   updateGroup,
+  deleteGroup,
 } from "./services/api";
 
 import "./App.css";
@@ -243,6 +244,48 @@ function App() {
       setEditGroupError(err.message || "Failed to update group");
     } finally {
       setEditGroupSubmitting(false);
+    }
+  };
+
+  const handleDeleteGroup = async () => {
+    if (!selectedGroup) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${selectedGroup.name}"? This action cannot be undone.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setError("");
+
+      await deleteGroup(selectedGroup._id);
+
+      const response = await getGroups();
+      const updatedGroups = response.data || [];
+
+      setGroups(updatedGroups);
+      setSelectedGroupId(null);
+      setSettlement(null);
+      setExpenses([]);
+      setBalances(null);
+      setShowEditGroupForm(false);
+      setShowGroupForm(false);
+      setShowExpenseForm(false);
+
+      const firstActiveGroup = updatedGroups.find(
+        (group) => group.members && group.members.length > 0,
+      );
+
+      if (firstActiveGroup) {
+        setSelectedGroupId(firstActiveGroup._id);
+      }
+    } catch (err) {
+      setError(err.message || "Failed to delete group");
     }
   };
 
@@ -582,6 +625,14 @@ function App() {
                   }}
                 >
                   ✎ Edit Group
+                </button>
+
+                <button
+                  type="button"
+                  className="add-expense-button delete-group-button"
+                  onClick={handleDeleteGroup}
+                >
+                  🗑 Delete Group
                 </button>
 
                 <button

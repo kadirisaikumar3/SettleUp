@@ -6,6 +6,7 @@ const {
   getGroupById,
   updateGroupMembers,
   updateGroup,
+  deleteGroup,
 } = require("../controllers/groupController");
 
 const {
@@ -27,6 +28,8 @@ router.get("/", getAllGroups);
 router.put("/:id/members", updateGroupMembers);
 
 router.put("/:id", updateGroup);
+
+router.delete("/:id", deleteGroup);
 
 router.post("/:id/expenses", (req, res) => {
   req.body.groupId = req.params.id;

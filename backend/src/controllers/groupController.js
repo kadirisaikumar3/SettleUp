@@ -97,10 +97,27 @@ const updateGroup = async (req, res) => {
   }
 };
 
+const deleteGroup = async (req, res) => {
+  try {
+    const result = await groupService.deleteGroup(req.params.id);
+
+    res.status(200).json({
+      status: "success",
+      message: result.message,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   createGroup,
   getAllGroups,
   getGroupById,
   updateGroupMembers,
   updateGroup,
+  deleteGroup,
 };
