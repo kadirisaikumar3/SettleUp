@@ -88,4 +88,28 @@ describe("collectGroupExpenses", () => {
 
     expect(result).toEqual([]);
   });
+
+  test("should stop safely when the group hierarchy contains a cycle", () => {
+    const groups = [
+      { id: "group-a", parentGroupId: "group-c" },
+      { id: "group-b", parentGroupId: "group-a" },
+      { id: "group-c", parentGroupId: "group-b" },
+    ];
+
+    const expenses = [
+      { id: "expense1", groupId: "group-a", amount: 100 },
+      { id: "expense2", groupId: "group-b", amount: 200 },
+      { id: "expense3", groupId: "group-c", amount: 300 },
+    ];
+
+    const result = collectGroupExpenses("group-a", groups, expenses);
+
+    expect(result).toHaveLength(3);
+
+    expect(result.map((expense) => expense.id)).toEqual([
+      "expense1",
+      "expense2",
+      "expense3",
+    ]);
+  });
 });
