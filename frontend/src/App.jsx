@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import {
   getGroups,
   getGroupSettlement,
@@ -6,7 +7,9 @@ import {
   getGroupBalances,
   getUsers,
   createExpense,
+  createGroup,
 } from "./services/api";
+
 import "./App.css";
 
 function App() {
@@ -20,6 +23,14 @@ function App() {
   const [users, setUsers] = useState([]);
 
   const [showExpenseForm, setShowExpenseForm] = useState(false);
+
+  const [showGroupForm, setShowGroupForm] = useState(false);
+
+  const [groupForm, setGroupForm] = useState({
+    name: "",
+    parentGroupId: "",
+    members: [],
+  });
 
   const [expenseForm, setExpenseForm] = useState({
     description: "",
@@ -128,6 +139,43 @@ function App() {
   // --------------------------------------------------
   // Helpers
   // --------------------------------------------------
+
+  const handleCreateGroup = async () => {
+    setError("");
+
+    if (!groupForm.name.trim()) {
+      setError("Please enter a group name.");
+      return;
+    }
+
+    if (groupForm.members.length === 0) {
+      setError("Please select at least one member.");
+      return;
+    }
+
+    try {
+      const response = await createGroup({
+        name: groupForm.name.trim(),
+        parentGroupId: groupForm.parentGroupId || null,
+        members: groupForm.members,
+      });
+
+      const createdGroup = response.data;
+
+      setGroups((currentGroups) => [...currentGroups, createdGroup]);
+
+      setGroupForm({
+        name: "",
+        parentGroupId: "",
+        members: [],
+      });
+
+      setShowGroupForm(false);
+    } catch (err) {
+      setError(err.message || "Failed to create group.");
+    }
+  };
+
   const handleGroupSelect = (groupId) => {
     if (groupId === selectedGroupId) {
       return;
@@ -239,6 +287,55 @@ function App() {
   };
 
   // --------------------------------------------------
+  // Recursive group tree renderer
+  // --------------------------------------------------
+  const renderGroupTree = (group) => {
+    const isSelected = group._id === selectedGroupId;
+
+    const childGroups = groups.filter(
+      (childGroup) => childGroup.parentGroupId === group._id,
+    );
+
+    return (
+      <div className="group-tree-item" key={group._id}>
+        <button
+          type="button"
+          className={`group-card ${isSelected ? "selected" : ""}`}
+          onClick={() => handleGroupSelect(group._id)}
+        >
+          <div className="group-card-top">
+            <span className="group-icon">
+              {childGroups.length > 0 ? "G" : "↳"}
+            </span>
+
+            {isSelected && <span className="selected-badge">SELECTED</span>}
+          </div>
+
+          <h3>{group.name}</h3>
+
+          <p>{group.members?.length || 0} members</p>
+
+          <span className="group-action">
+            {isSelected
+              ? childGroups.length > 0
+                ? "Viewing group"
+                : "Viewing subgroup"
+              : childGroups.length > 0
+                ? "View group →"
+                : "View subgroup →"}
+          </span>
+        </button>
+
+        {childGroups.length > 0 && (
+          <div className="nested-groups">
+            {childGroups.map((childGroup) => renderGroupTree(childGroup))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // --------------------------------------------------
   // Loading state
   // --------------------------------------------------
   if (loading) {
@@ -252,6 +349,10 @@ function App() {
       </div>
     );
   }
+
+  // --------------------------------------------------
+  // Group card renderer
+  // --------------------------------------------------
 
   return (
     <div className="app">
@@ -352,36 +453,16 @@ function App() {
           </div>
 
           <div className="groups-grid">
-            {rootGroups.map((group) => {
-              const isSelected = group._id === selectedGroupId;
+            {rootGroups.map((group) => renderGroupTree(group))}
 
-              return (
-                <button
-                  key={group._id}
-                  type="button"
-                  className={`group-card ${isSelected ? "selected" : ""}`}
-                  onClick={() => handleGroupSelect(group._id)}
-                >
-                  <div className="group-card-top">
-                    <span className="group-icon">G</span>
-
-                    {isSelected && (
-                      <span className="selected-badge">SELECTED</span>
-                    )}
-                  </div>
-
-                  <h3>{group.name}</h3>
-
-                  <p>{group.members?.length || 0} members</p>
-
-                  <span className="group-action">
-                    {isSelected ? "Viewing group" : "View group →"}
-                  </span>
-                </button>
-              );
-            })}
-
-            <button type="button" className="group-card add-group-card">
+            <button
+              type="button"
+              className="group-card add-group-card"
+              onClick={() => {
+                setShowGroupForm(true);
+                setError("");
+              }}
+            >
               <span className="add-icon">+</span>
 
               <h3>Create new group</h3>
@@ -411,6 +492,17 @@ function App() {
                   type="button"
                   className="add-expense-button"
                   onClick={() => {
+                    setShowGroupForm(true);
+                    setError("");
+                  }}
+                >
+                  + Create Group
+                </button>
+
+                <button
+                  type="button"
+                  className="add-expense-button"
+                  onClick={() => {
                     setShowExpenseForm(true);
                     setExpenseSuccess("");
                     setExpenseError("");
@@ -420,6 +512,131 @@ function App() {
                 </button>
               </div>
             </div>
+
+            {/* Create Group Form */}
+            {showGroupForm && (
+              <div className="expense-form-card">
+                <div className="expense-form-header">
+                  <div>
+                    <span className="eyebrow">NEW GROUP</span>
+                    <h3>Create a group</h3>
+                  </div>
+
+                  <button
+                    type="button"
+                    className="expense-cancel-button"
+                    onClick={() => {
+                      setShowGroupForm(false);
+                      setError("");
+
+                      setGroupForm({
+                        name: "",
+                        parentGroupId: "",
+                        members: [],
+                      });
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+
+                <div className="expense-form-body">
+                  <label className="form-field">
+                    <span>Group name</span>
+                    <input
+                      type="text"
+                      placeholder="Enter group name"
+                      value={groupForm.name}
+                      onChange={(event) =>
+                        setGroupForm({
+                          ...groupForm,
+                          name: event.target.value,
+                        })
+                      }
+                    />
+                  </label>
+
+                  <label className="form-field">
+                    <span>Parent group</span>
+                    <select
+                      value={groupForm.parentGroupId}
+                      onChange={(event) =>
+                        setGroupForm({
+                          ...groupForm,
+                          parentGroupId: event.target.value,
+                        })
+                      }
+                    >
+                      <option value="">No parent — Root group</option>
+
+                      {groups.map((group) => (
+                        <option key={group._id} value={group._id}>
+                          {group.name}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <div className="form-field">
+                    <span>Members</span>
+
+                    <div className="member-checkbox-list">
+                      {users.map((user) => (
+                        <label key={user._id} className="member-checkbox">
+                          <input
+                            type="checkbox"
+                            checked={groupForm.members.includes(user._id)}
+                            onChange={(event) => {
+                              const userId = user._id;
+
+                              setGroupForm((currentForm) => ({
+                                ...currentForm,
+                                members: event.target.checked
+                                  ? [...currentForm.members, userId]
+                                  : currentForm.members.filter(
+                                      (id) => id !== userId,
+                                    ),
+                              }));
+                            }}
+                          />
+
+                          <span>{user.name}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {error && <p className="form-error">{error}</p>}
+
+                  <div className="expense-form-actions">
+                    <button
+                      type="button"
+                      className="expense-cancel-button"
+                      onClick={() => {
+                        setShowGroupForm(false);
+                        setError("");
+
+                        setGroupForm({
+                          name: "",
+                          parentGroupId: "",
+                          members: [],
+                        });
+                      }}
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      type="button"
+                      className="add-expense-button"
+                      onClick={handleCreateGroup}
+                    >
+                      Create Group
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Add Expense Form */}
             {showExpenseForm && (
@@ -601,9 +818,7 @@ function App() {
 
               <div className="stat-card">
                 <span className="stat-label">TOTAL EXPENSE</span>
-                <strong>
-                  {formatAmount(settlement?.totalExpense)}
-                </strong>
+                <strong>{formatAmount(settlement?.totalExpense)}</strong>
               </div>
             </div>
 
@@ -809,5 +1024,4 @@ function App() {
     </div>
   );
 }
-
 export default App;

@@ -27,6 +27,13 @@ export const getGroups = async () => {
   return apiRequest("/groups");
 };
 
+export const createGroup = async (groupData) => {
+  return apiRequest("/groups", {
+    method: "POST",
+    body: JSON.stringify(groupData),
+  });
+};
+
 export const getGroup = async (groupId) => {
   return apiRequest(`/groups/${groupId}`);
 };

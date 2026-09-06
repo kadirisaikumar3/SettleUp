@@ -234,9 +234,10 @@
 ================================================== */
 
 .groups-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
 }
 
 .group-card {
@@ -604,7 +605,7 @@
   }
 
   .groups-grid {
-    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
   }
 
   .stats-grid {
@@ -640,7 +641,6 @@
     letter-spacing: -3px;
   }
 
-  .groups-grid,
   .details-grid,
   .stats-grid {
     grid-template-columns: 1fr;
@@ -905,5 +905,120 @@
   .expense-submit-button,
   .expense-cancel-button {
     width: 100%;
+  }
+}
+
+.member-checkbox-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.member-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: fit-content;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.member-checkbox input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: #171717;
+}
+
+.member-checkbox span {
+  font-weight: 600;
+}
+
+/* ==================================================
+   GROUP HIERARCHY
+   ================================================== */
+
+.group-tree-item {
+  width: 100%;
+  min-width: 0;
+}
+
+.group-tree-item > .group-card {
+  width: min(100%, 450px);
+  min-height: 220px;
+}
+
+.nested-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  width: calc(100% - 42px);
+  margin-top: 22px;
+  margin-left: 42px;
+  padding: 4px 0 4px 24px;
+  box-sizing: border-box;
+  border-left: 2px solid #d9d9d9;
+}
+
+.nested-groups .group-tree-item {
+  min-width: 0;
+}
+
+.nested-groups .group-tree-item > .group-card {
+  width: 100%;
+  min-height: 220px;
+  padding: 24px;
+}
+
+.group-tree-item .group-card h3 {
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.group-tree-item .group-card p {
+  margin-bottom: 0;
+}
+
+.group-tree-item .group-action {
+  margin-top: 24px;
+}
+
+/* Keep Create Group card visually distinct */
+.groups-grid > .add-group-card {
+  width: min(100%, 450px);
+  min-height: 220px;
+}
+
+/* Responsive hierarchy */
+
+@media (max-width: 900px) {
+  .nested-groups {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .groups-grid {
+    gap: 24px;
+  }
+
+  .group-tree-item > .group-card,
+  .groups-grid > .add-group-card {
+    width: 100%;
+  }
+
+  .nested-groups {
+    width: calc(100% - 24px);
+    margin-left: 24px;
+    padding-left: 18px;
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 550px) {
+  .nested-groups {
+    width: calc(100% - 12px);
+    margin-left: 12px;
+    padding-left: 12px;
   }
 }
