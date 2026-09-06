@@ -23,12 +23,19 @@ const createExpense = async ({
     throw new Error("Expense description is required");
   }
 
-  if (!amount || amount <= 0) {
-    throw new Error("Expense amount must be greater than zero");
+  if (typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) {
+    throw new Error("Expense amount must be a valid number greater than zero");
   }
 
   if (!Array.isArray(splitAmong) || splitAmong.length === 0) {
     throw new Error("Expense must be split among at least one user");
+  }
+
+  if (
+    new Set(splitAmong.map((userId) => userId.toString())).size !==
+    splitAmong.length
+  ) {
+    throw new Error("Expense participants cannot contain duplicates");
   }
 
   const group = await Group.findById(groupId);
