@@ -6,14 +6,6 @@ SettleUp is a full-stack expense management application that models shared group
 
 The project focuses on solving the core expense-settlement problem efficiently using HashMaps, Trees, DFS, Max Heaps, and Greedy Algorithms.
 
-🌐 Live Demo
-
-Frontend: https://settle-up-sage.vercel.app
-
-Backend API: https://settleup-uiyc.onrender.com
-
-Health Check: https://settleup-uiyc.onrender.com/api/health
-
 🚀 Features
 
 Create and manage groups
@@ -54,7 +46,7 @@ SettleUp is designed around practical DSA concepts.
 
 HashMap
 
-Used to maintain each user's running balance while processing expenses.
+A Map is used to maintain each user's running balance while processing expenses.
 
 User → Balance
 Sai → +1600
@@ -84,7 +76,7 @@ DFS — Depth-First Search
 
 DFS traverses the selected group and all nested child groups to aggregate expenses across the complete subtree.
 
-Cycle protection using a Set prevents infinite recursion if corrupted hierarchical data contains circular references.
+A Set is used to protect the traversal from infinite recursion if corrupted hierarchical data contains circular references.
 
 Max Heap
 
@@ -122,6 +114,7 @@ Instead of generating unnecessary pairwise transactions, the algorithm directly 
 │ Frontend │
 │ Vercel │
 └────────────┬─────────────┘
+│
 │ REST API
 ▼
 ┌──────────────────────────┐
@@ -243,7 +236,7 @@ Display optimized transactions
 
 Backend tests are implemented using Jest.
 
-Current test status:
+Current Test Status
 
 Test Suites: 5 passed, 5 total
 Tests: 17 passed, 17 total
@@ -264,38 +257,38 @@ Decimal rounding
 
 Circular hierarchy protection
 
-Run tests:
+Run Tests
 
 cd backend
 npm test
 
 ⚙️ Local Setup
 
-Clone
+1. Clone the repository
 
 git clone https://github.com/kadirisaikumar3/SettleUp.git
 cd SettleUp
 
-Backend
+2. Backend
 
 cd backend
 npm install
 
-Create .env:
+Create a .env file:
 
 PORT=5000
 MONGODB_URI=your_mongodb_connection_string
 NODE_ENV=development
 
-Start:
+Start the backend:
 
 npm start
 
-Development:
+For development:
 
 npm run dev
 
-Frontend
+3. Frontend
 
 Open another terminal:
 
@@ -313,7 +306,7 @@ NODE_ENV=development
 
 Frontend
 
-Production:
+For production:
 
 VITE_API_URL=https://settleup-uiyc.onrender.com/api
 
@@ -323,10 +316,12 @@ Never commit .env files or database credentials to GitHub.
 
 Frontend — Vercel
 
+Live Demo:
 https://settle-up-sage.vercel.app
 
 Backend — Render
 
+API:
 https://settleup-uiyc.onrender.com
 
 Health Check
@@ -341,11 +336,19 @@ The production backend connects to MongoDB Atlas using the MONGODB_URI environme
 
 The settlement engine uses max heaps for creditors and debtors and a greedy matching strategy.
 
-For n participants, settlement calculation runs in approximately:
+For n participants, the settlement calculation is designed around heap operations and runs in approximately:
 
 O(n log n)
 
 Expense aggregation uses DFS over the group hierarchy.
+
+DFS traversal: O(G + E)
+
+where:
+
+G = number of groups in the traversed hierarchy
+
+E = number of expenses inspected during aggregation
 
 The project demonstrates how appropriate data structures can improve an expense-settlement workflow compared with naive pairwise transaction generation.
 
@@ -375,13 +378,10 @@ The goal of SettleUp is to demonstrate how Data Structures and Algorithms can be
 
 The application models:
 
-Groups as trees
-
-User balances using hash maps
-
-Settlement participants using max heaps
-
-Final transaction generation using a greedy algorithm
+Groups → Trees
+User balances → HashMaps
+Settlement participants → Max Heaps
+Transaction generation → Greedy Algorithm
 
 🚀 Project Status
 
@@ -410,4 +410,4 @@ LinkedIn: https://www.linkedin.com/in/saikumarkadiri/
 
 ⭐ Support
 
-If you find this project useful or interesting, consider giving the repository a ⭐ on GitHub.
+If you find this project useful or interesting, consider giving the repository a ⭐ on GitHub
