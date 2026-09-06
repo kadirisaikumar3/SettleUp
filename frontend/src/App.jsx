@@ -10,6 +10,8 @@ import {
   createGroup,
   updateGroup,
   deleteGroup,
+  updateExpense,
+  deleteExpense,
 } from "./services/api";
 
 import "./App.css";
@@ -25,6 +27,127 @@ function App() {
   const [users, setUsers] = useState([]);
 
   const [showExpenseForm, setShowExpenseForm] = useState(false);
+
+  const [showEditExpenseForm, setShowEditExpenseForm] = useState(false);
+  const [editingExpense, setEditingExpense] = useState(null);
+  const [editExpenseForm, setEditExpenseForm] = useState({
+    description: "",
+    amount: "",
+    paidBy: "",
+    splitAmong: [],
+  });
+  const [editExpenseSubmitting, setEditExpenseSubmitting] = useState(false);
+  const [editExpenseError, setEditExpenseError] = useState("");
+  const [editExpenseSuccess, setEditExpenseSuccess] = useState("");
+
+  const handleEditExpense = (expense) => {
+    if (!expense) {
+      return;
+    }
+
+    const payerId =
+      typeof expense.paidBy === "object" ? expense.paidBy?._id : expense.paidBy;
+
+    const participantIds = Array.isArray(expense.splitAmong)
+      ? expense.splitAmong
+          .map((user) => (typeof user === "object" ? user?._id : user))
+          .filter(Boolean)
+      : [];
+
+    setEditingExpense(expense);
+
+    setEditExpenseForm({
+      description: expense.description ?? "",
+      amount:
+        expense.amount !== undefined && expense.amount !== null
+          ? String(expense.amount)
+          : "",
+      paidBy: payerId ?? "",
+      splitAmong: participantIds,
+    });
+
+    setEditExpenseError("");
+    setEditExpenseSuccess("");
+    setShowEditExpenseForm(true);
+  };
+
+  const handleUpdateExpense = async (event) => {
+    event.preventDefault();
+
+    if (!editingExpense) {
+      return;
+    }
+
+    try {
+      setEditExpenseSubmitting(true);
+      setEditExpenseError("");
+      setEditExpenseSuccess("");
+
+      await updateExpense(editingExpense._id, {
+        groupId: selectedGroupId,
+        paidBy: editExpenseForm.paidBy,
+        description: editExpenseForm.description,
+        amount: Number(editExpenseForm.amount),
+        splitAmong: editExpenseForm.splitAmong,
+      });
+
+      setEditExpenseSuccess("Expense updated successfully");
+
+      const expensesResponse = await getGroupExpenses(selectedGroupId);
+      setExpenses(expensesResponse.data || []);
+
+      const balanceResponse = await getGroupBalances(selectedGroupId);
+      setBalances(balanceResponse.data || null);
+
+      const settlementResponse = await getGroupSettlement(selectedGroupId);
+      setSettlement(settlementResponse.data || null);
+
+      setTimeout(() => {
+        setShowEditExpenseForm(false);
+        setEditingExpense(null);
+        setEditExpenseSuccess("");
+      }, 800);
+    } catch (err) {
+      setEditExpenseError(err.message || "Failed to update expense");
+    } finally {
+      setEditExpenseSubmitting(false);
+    }
+  };
+
+  const handleDeleteExpense = async (expense) => {
+    if (!expense) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${expense.description}"? This action cannot be undone.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setError("");
+      setDeleteExpenseSuccess("");
+      setExpenseSuccess("");
+
+      await deleteExpense(expense._id);
+
+      setDeleteExpenseSuccess("Expense deleted successfully");
+
+      const expensesResponse = await getGroupExpenses(selectedGroupId);
+      setExpenses(expensesResponse.data || []);
+
+      const balanceResponse = await getGroupBalances(selectedGroupId);
+      setBalances(balanceResponse.data || null);
+
+      const settlementResponse = await getGroupSettlement(selectedGroupId);
+      setSettlement(settlementResponse.data || null);
+    } catch (err) {
+      setError(err.message || "Failed to delete expense");
+    }
+  };
 
   const [showGroupForm, setShowGroupForm] = useState(false);
 
@@ -58,6 +181,8 @@ function App() {
   const [expenseSubmitting, setExpenseSubmitting] = useState(false);
   const [expenseSuccess, setExpenseSuccess] = useState("");
   const [expenseError, setExpenseError] = useState("");
+
+  const [deleteExpenseSuccess, setDeleteExpenseSuccess] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [detailsLoading, setDetailsLoading] = useState(false);
@@ -1080,6 +1205,167 @@ function App() {
               </div>
             )}
 
+            {/* Edit Expense Form */}
+            {showEditExpenseForm && editingExpense && (
+              <>
+                <div className="edit-expense-modal-overlay">
+                  <div className="expense-form-card edit-expense-modal">
+                    <div className="expense-form-header">
+                      <div>
+                        <span className="eyebrow">EDIT EXPENSE</span>
+                        <h3>Edit expense</h3>
+                      </div>
+
+                      <button
+                        type="button"
+                        className="expense-cancel-button"
+                        onClick={() => {
+                          setShowEditExpenseForm(false);
+                          setEditingExpense(null);
+                          setEditExpenseError("");
+                          setEditExpenseSuccess("");
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+
+                    <div className="expense-form-grid">
+                      {/* Description */}
+                      <div className="form-field">
+                        <label htmlFor="edit-expense-description">
+                          Description
+                        </label>
+
+                        <input
+                          id="edit-expense-description"
+                          type="text"
+                          placeholder="e.g. Dinner at restaurant"
+                          value={editExpenseForm.description}
+                          onChange={(event) =>
+                            setEditExpenseForm((currentForm) => ({
+                              ...currentForm,
+                              description: event.target.value,
+                            }))
+                          }
+                        />
+                      </div>
+
+                      {/* Amount */}
+                      <div className="form-field">
+                        <label htmlFor="edit-expense-amount">Amount</label>
+
+                        <input
+                          id="edit-expense-amount"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          placeholder="e.g. 1500"
+                          value={editExpenseForm.amount}
+                          onChange={(event) =>
+                            setEditExpenseForm((currentForm) => ({
+                              ...currentForm,
+                              amount: event.target.value,
+                            }))
+                          }
+                        />
+                      </div>
+
+                      {/* Paid by */}
+                      <div className="form-field">
+                        <label htmlFor="edit-expense-paid-by">Paid by</label>
+
+                        <select
+                          id="edit-expense-paid-by"
+                          value={editExpenseForm.paidBy}
+                          onChange={(event) =>
+                            setEditExpenseForm((currentForm) => ({
+                              ...currentForm,
+                              paidBy: event.target.value,
+                            }))
+                          }
+                        >
+                          <option value="">Select payer</option>
+
+                          {selectedGroup.members?.map((member) => (
+                            <option key={member._id} value={member._id}>
+                              {member.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Split among */}
+                    <div className="split-section">
+                      <label>Split among</label>
+
+                      <div className="split-options">
+                        {selectedGroup.members?.map((member) => (
+                          <label className="split-option" key={member._id}>
+                            <input
+                              type="checkbox"
+                              checked={editExpenseForm.splitAmong.includes(
+                                member._id,
+                              )}
+                              onChange={(event) => {
+                                const memberId = member._id;
+
+                                setEditExpenseForm((currentForm) => ({
+                                  ...currentForm,
+                                  splitAmong: event.target.checked
+                                    ? [...currentForm.splitAmong, memberId]
+                                    : currentForm.splitAmong.filter(
+                                        (id) => id !== memberId,
+                                      ),
+                                }));
+                              }}
+                            />
+
+                            <span>{member.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {editExpenseError && (
+                      <p className="form-error">{editExpenseError}</p>
+                    )}
+
+                    {editExpenseSuccess && (
+                      <p className="form-success">{editExpenseSuccess}</p>
+                    )}
+
+                    <div className="expense-form-actions">
+                      <button
+                        type="button"
+                        className="expense-cancel-button"
+                        onClick={() => {
+                          setShowEditExpenseForm(false);
+                          setEditingExpense(null);
+                          setEditExpenseError("");
+                          setEditExpenseSuccess("");
+                        }}
+                      >
+                        Cancel
+                      </button>
+
+                      <button
+                        type="button"
+                        className="expense-submit-button"
+                        disabled={editExpenseSubmitting}
+                        onClick={handleUpdateExpense}
+                      >
+                        {editExpenseSubmitting
+                          ? "Updating..."
+                          : "Update Expense"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
             {/* Summary cards */}
             <div className="stats-grid">
               <div className="stat-card">
@@ -1156,6 +1442,10 @@ function App() {
                   </div>
                 </div>
 
+                {deleteExpenseSuccess && (
+                  <p className="form-success">{deleteExpenseSuccess}</p>
+                )}
+
                 {expenses.length > 0 ? (
                   <div className="expense-list">
                     {expenses.map((expense) => (
@@ -1168,9 +1458,29 @@ function App() {
                           </span>
                         </div>
 
-                        <strong className="expense-amount">
-                          {formatAmount(expense.amount)}
-                        </strong>
+                        <div className="expense-row-actions">
+                          <strong className="expense-amount">
+                            {formatAmount(expense.amount)}
+                          </strong>
+
+                          <button
+                            type="button"
+                            className="edit-expense-button"
+                            onClick={() => {
+                              handleEditExpense(expense);
+                            }}
+                          >
+                            ✏️ Edit
+                          </button>
+
+                          <button
+                            type="button"
+                            className="delete-expense-button"
+                            onClick={() => handleDeleteExpense(expense)}
+                          >
+                            🗑 Delete
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>

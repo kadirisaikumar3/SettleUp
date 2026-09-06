@@ -1155,3 +1155,54 @@
     width: 100%;
   }
 }
+
+/* ================================
+   Edit Expense Modal
+================================ */
+
+.edit-expense-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
+}
+
+.edit-expense-modal {
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: 0;
+  position: relative;
+  animation: editExpenseModalIn 0.2s ease-out;
+}
+
+@keyframes editExpenseModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+  .edit-expense-modal-overlay {
+    padding: 16px;
+    align-items: flex-start;
+    padding-top: 40px;
+  }
+
+  .edit-expense-modal {
+    max-height: calc(100vh - 56px);
+  }
+}

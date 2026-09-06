@@ -67,4 +67,15 @@ export const createExpense = async (expenseData) =>
     body: JSON.stringify(expenseData),
   });
 
+export const updateExpense = async (expenseId, expenseData) =>
+  apiRequest(`/expenses/${expenseId}`, {
+    method: "PUT",
+    body: JSON.stringify(expenseData),
+  });
+
+export const deleteExpense = async (expenseId) =>
+  apiRequest(`/expenses/${expenseId}`, {
+    method: "DELETE",
+  });
+
 export default apiRequest;
