@@ -36,6 +36,8 @@ function App() {
 
   const [showEditGroupForm, setShowEditGroupForm] = useState(false);
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   const [editGroupForm, setEditGroupForm] = useState({
     name: "",
     parentGroupId: "",
@@ -252,11 +254,11 @@ function App() {
       return;
     }
 
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${selectedGroup.name}"? This action cannot be undone.`,
-    );
+    setShowDeleteModal(true);
+  };
 
-    if (!confirmed) {
+  const confirmDeleteGroup = async () => {
+    if (!selectedGroup) {
       return;
     }
 
@@ -276,6 +278,7 @@ function App() {
       setShowEditGroupForm(false);
       setShowGroupForm(false);
       setShowExpenseForm(false);
+      setShowDeleteModal(false);
 
       const firstActiveGroup = updatedGroups.find(
         (group) => group.members && group.members.length > 0,
@@ -285,6 +288,7 @@ function App() {
         setSelectedGroupId(firstActiveGroup._id);
       }
     } catch (err) {
+      setShowDeleteModal(false);
       setError(err.message || "Failed to delete group");
     }
   };
@@ -1298,6 +1302,43 @@ function App() {
         <strong>SettleUp</strong>
         <span>Graph & Tree-Based Group Expense Settlement Engine</span>
       </footer>
+
+      {showDeleteModal && selectedGroup && (
+        <div className="modal-overlay">
+          <div className="delete-modal">
+            <div className="delete-modal-icon">🗑️</div>
+
+            <h2>Delete Group?</h2>
+
+            <p>
+              Are you sure you want to delete{" "}
+              <strong>"{selectedGroup.name}"</strong>?
+            </p>
+
+            <p className="delete-modal-warning">
+              This action cannot be undone.
+            </p>
+
+            <div className="delete-modal-actions">
+              <button
+                type="button"
+                className="cancel-delete-button"
+                onClick={() => setShowDeleteModal(false)}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                className="confirm-delete-button"
+                onClick={confirmDeleteGroup}
+              >
+                🗑 Delete Group
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

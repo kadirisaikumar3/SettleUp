@@ -1022,3 +1022,136 @@
     padding-left: 12px;
   }
 }
+
+/* Delete Group Confirmation Modal */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+}
+
+.delete-modal {
+  width: 100%;
+  max-width: 430px;
+  padding: 32px;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  animation: deleteModalAppear 0.2s ease-out;
+}
+
+.delete-modal-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #fee2e2;
+  font-size: 30px;
+}
+
+.delete-modal h2 {
+  margin: 0 0 12px;
+  font-size: 24px;
+  color: #111827;
+}
+
+.delete-modal p {
+  margin: 8px 0;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.delete-modal-warning {
+  font-size: 14px;
+  color: #dc2626 !important;
+  font-weight: 600;
+}
+
+.delete-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.cancel-delete-button,
+.confirm-delete-button {
+  min-width: 130px;
+  padding: 11px 18px;
+  border: none;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    opacity 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.cancel-delete-button {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.confirm-delete-button {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.cancel-delete-button:hover,
+.confirm-delete-button:hover {
+  transform: translateY(-1px);
+}
+
+.cancel-delete-button:hover {
+  background: #e5e7eb;
+}
+
+.confirm-delete-button:hover {
+  background: #b91c1c;
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.25);
+}
+
+.cancel-delete-button:active,
+.confirm-delete-button:active {
+  transform: translateY(0);
+}
+
+@keyframes deleteModalAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@media (max-width: 500px) {
+  .delete-modal {
+    padding: 26px 20px;
+  }
+
+  .delete-modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .cancel-delete-button,
+  .confirm-delete-button {
+    width: 100%;
+  }
+}
