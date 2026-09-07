@@ -13,7 +13,10 @@ const apiRequest = async (endpoint, options = {}) => {
     },
   });
 
-  const data = await response.json();
+  const contentType = response.headers.get("content-type");
+  const data = contentType?.includes("application/json")
+    ? await response.json()
+    : {};
 
   if (!response.ok) {
     if (response.status === 401) {
