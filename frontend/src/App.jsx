@@ -194,6 +194,7 @@ function App() {
   });
 
   const [editGroupSubmitting, setEditGroupSubmitting] = useState(false);
+  const [groupSubmitting, setGroupSubmitting] = useState(false);
   const [editGroupError, setEditGroupError] = useState("");
   const [editGroupSuccess, setEditGroupSuccess] = useState("");
 
@@ -349,6 +350,7 @@ function App() {
     }
 
     try {
+      setGroupSubmitting(true);
       const response = await createGroup({
         name: groupForm.name.trim(),
         parentGroupId: groupForm.parentGroupId || null,
@@ -368,6 +370,8 @@ function App() {
       setShowGroupForm(false);
     } catch (err) {
       setError(err.message || "Failed to create group.");
+    } finally {
+      setGroupSubmitting(false);
     }
   };
 
@@ -886,9 +890,10 @@ function App() {
                 <button
                   type="button"
                   className="add-expense-button"
+                  disabled={groupSubmitting}
                   onClick={handleCreateGroup}
                 >
-                  Create Group
+                  {groupSubmitting ? "Creating..." : "Create Group"}
                 </button>
               </div>
             </div>
