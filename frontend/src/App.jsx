@@ -93,6 +93,13 @@ function App() {
       return;
     }
 
+    const editExpenseAmount = Number(editExpenseForm.amount);
+
+    if (!Number.isFinite(editExpenseAmount) || editExpenseAmount <= 0) {
+      setEditExpenseError("Please enter a valid amount.");
+      return;
+    }
+
     try {
       setEditExpenseSubmitting(true);
       setEditExpenseError("");
@@ -101,8 +108,8 @@ function App() {
       await updateExpense(editingExpense._id, {
         groupId: selectedGroupId,
         paidBy: editExpenseForm.paidBy,
-        description: editExpenseForm.description,
-        amount: Number(editExpenseForm.amount),
+        description: editExpenseForm.description.trim(),
+        amount: editExpenseAmount,
         splitAmong: editExpenseForm.splitAmong,
       });
 
