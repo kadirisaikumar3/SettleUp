@@ -2,7 +2,25 @@ const Group = require("../models/Group");
 const User = require("../models/User");
 const Expense = require("../models/Expense");
 
-const createGroup = async ({ name, members = [], parentGroupId = null }) => {
+const userHasGroupAccess = (group, userId) => {
+  if (!group || !userId) {
+    return false;
+  }
+
+  const userIdString = userId.toString();
+
+  return (
+    group.createdBy?.toString() === userIdString ||
+    group.members.some((memberId) => memberId.toString() === userIdString)
+  );
+};
+
+const createGroup = async ({
+  name,
+  members = [],
+  parentGroupId = null,
+  createdBy,
+}) => {
   if (!name || !name.trim()) {
     throw new Error("Group name is required");
   }
@@ -21,32 +39,43 @@ const createGroup = async ({ name, members = [], parentGroupId = null }) => {
     if (!parentGroup) {
       throw new Error("Parent group not found");
     }
+
+    if (!userHasGroupAccess(parentGroup, createdBy)) {
+      throw new Error("Access denied to parent group");
+    }
   }
 
   const group = await Group.create({
     name: name.trim(),
     members,
     parentGroupId,
+    createdBy,
   });
 
   return group;
 };
 
-const getGroupById = async (groupId) => {
-  const group = await Group.findById(groupId).populate("members", "name email");
+const getGroupById = async (groupId, userId) => {
+  const group = await Group.findOne({
+    _id: groupId,
+    $or: [{ createdBy: userId }, { members: userId }],
+  }).populate("members", "name email");
 
   if (!group) {
-    throw new Error("Group not found");
+    throw new Error("Group not found or access denied");
   }
 
   return group;
 };
 
-const updateGroupMembers = async (groupId, members) => {
-  const group = await Group.findById(groupId);
+const updateGroupMembers = async (groupId, members, userId) => {
+  const group = await Group.findOne({
+    _id: groupId,
+    createdBy: userId,
+  });
 
   if (!group) {
-    throw new Error("Group not found");
+    throw new Error("Group not found or access denied");
   }
 
   const existingUsers = await User.find({
@@ -64,11 +93,18 @@ const updateGroupMembers = async (groupId, members) => {
   return group.populate("members", "name email");
 };
 
-const updateGroup = async (groupId, { name, members, parentGroupId }) => {
-  const group = await Group.findById(groupId);
+const updateGroup = async (
+  groupId,
+  { name, members, parentGroupId },
+  userId,
+) => {
+  const group = await Group.findOne({
+    _id: groupId,
+    createdBy: userId,
+  });
 
   if (!group) {
-    throw new Error("Group not found");
+    throw new Error("Group not found or access denied");
   }
 
   if (name !== undefined) {
@@ -105,6 +141,10 @@ const updateGroup = async (groupId, { name, members, parentGroupId }) => {
         throw new Error("Parent group not found");
       }
 
+      if (!userHasGroupAccess(parentGroup, userId)) {
+        throw new Error("Access denied to parent group");
+      }
+
       // Prevent circular hierarchy
       let currentParent = parentGroup;
 
@@ -129,15 +169,22 @@ const updateGroup = async (groupId, { name, members, parentGroupId }) => {
   return group.populate("members", "name email");
 };
 
-const getAllGroups = async () => {
-  return Group.find().populate("members", "name email").sort({ createdAt: 1 });
+const getAllGroups = async (userId) => {
+  return Group.find({
+    $or: [{ createdBy: userId }, { members: userId }],
+  })
+    .populate("members", "name email")
+    .sort({ createdAt: 1 });
 };
 
-const deleteGroup = async (groupId) => {
-  const group = await Group.findById(groupId);
+const deleteGroup = async (groupId, userId) => {
+  const group = await Group.findOne({
+    _id: groupId,
+    createdBy: userId,
+  });
 
   if (!group) {
-    throw new Error("Group not found");
+    throw new Error("Group not found or access denied");
   }
 
   const childGroup = await Group.findOne({

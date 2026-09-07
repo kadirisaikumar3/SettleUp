@@ -4,6 +4,7 @@ const getGroupSettlement = async (req, res) => {
   try {
     const settlement = await settlementService.getGroupSettlement(
       req.params.groupId,
+      req.user.userId,
     );
 
     res.status(200).json({
@@ -22,6 +23,7 @@ const getGroupBalances = async (req, res) => {
   try {
     const balances = await settlementService.getGroupBalances(
       req.params.groupId,
+      req.user.userId,
     );
 
     res.status(200).json({

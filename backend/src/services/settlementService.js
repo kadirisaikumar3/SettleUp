@@ -5,20 +5,35 @@ const calculateBalances = require("../algorithms/balanceCalculator");
 const calculateSettlements = require("../algorithms/settlementCalculator");
 const collectGroupExpenses = require("../algorithms/expenseTreeTraversal");
 
-const getGroupSettlement = async (groupId) => {
+const userHasGroupAccess = (group, userId) => {
+  if (!group || !userId) return false;
+
+  const userIdString = userId.toString();
+
+  return (
+    group.createdBy?.toString() === userIdString ||
+    group.members.some((member) => member._id?.toString() === userIdString)
+  );
+};
+
+const getGroupSettlement = async (groupId, userId) => {
+  if (!userId) {
+    throw new Error("User authentication is required");
+  }
+
   const group = await Group.findById(groupId).populate("members", "name email");
 
   if (!group) {
     throw new Error("Group not found");
   }
 
-  // Get all groups in the database
-  const groups = await Group.find();
+  if (!userHasGroupAccess(group, userId)) {
+    throw new Error("Access denied to this group");
+  }
 
-  // Get all expenses in the database
+  const groups = await Group.find();
   const expenses = await Expense.find().sort({ createdAt: 1 });
 
-  // Convert MongoDB documents into the format expected by DFS
   const algorithmGroups = groups.map((currentGroup) => ({
     id: currentGroup._id.toString(),
     parentGroupId: currentGroup.parentGroupId
@@ -34,8 +49,6 @@ const getGroupSettlement = async (groupId) => {
     splitAmong: expense.splitAmong.map((userId) => userId.toString()),
   }));
 
-  // Use DFS to collect expenses from the requested group
-  // and all of its child groups.
   const groupExpenses = collectGroupExpenses(
     groupId,
     algorithmGroups,
@@ -47,19 +60,16 @@ const getGroupSettlement = async (groupId) => {
       groupExpenses.reduce((total, expense) => total + expense.amount, 0) * 100,
     ) / 100;
 
-  // Calculate balances using expenses collected by DFS
   const balances = calculateBalances(groupExpenses);
 
-  // Calculate minimum settlements using Max Heap + Greedy
   const settlements = calculateSettlements(balances);
 
   const balanceDetails = group.members.map((member) => {
-    const userId = member._id.toString();
-
-    const balance = balances.get(userId) || 0;
+    const memberId = member._id.toString();
+    const balance = balances.get(memberId) || 0;
 
     return {
-      userId,
+      userId: memberId,
       name: member.name,
       email: member.email,
       balance: Math.round(balance * 100) / 100,
@@ -99,15 +109,22 @@ const getGroupSettlement = async (groupId) => {
   };
 };
 
-const getGroupBalances = async (groupId) => {
+const getGroupBalances = async (groupId, userId) => {
+  if (!userId) {
+    throw new Error("User authentication is required");
+  }
+
   const group = await Group.findById(groupId).populate("members", "name email");
 
   if (!group) {
     throw new Error("Group not found");
   }
 
-  const groups = await Group.find();
+  if (!userHasGroupAccess(group, userId)) {
+    throw new Error("Access denied to this group");
+  }
 
+  const groups = await Group.find();
   const expenses = await Expense.find().sort({ createdAt: 1 });
 
   const algorithmGroups = groups.map((currentGroup) => ({
@@ -134,13 +151,13 @@ const getGroupBalances = async (groupId) => {
   const balances = calculateBalances(groupExpenses);
 
   return group.members.map((member) => {
-    const userId = member._id.toString();
+    const memberId = member._id.toString();
 
     return {
-      userId,
+      userId: memberId,
       name: member.name,
       email: member.email,
-      balance: Math.round((balances.get(userId) || 0) * 100) / 100,
+      balance: Math.round((balances.get(memberId) || 0) * 100) / 100,
     };
   });
 };

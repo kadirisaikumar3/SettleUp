@@ -10,6 +10,7 @@ const createExpense = async (req, res) => {
       description,
       amount,
       splitAmong,
+      userId: req.user.userId,
     });
 
     res.status(201).json({
@@ -27,7 +28,10 @@ const createExpense = async (req, res) => {
 
 const getGroupExpenses = async (req, res) => {
   try {
-    const expenses = await expenseService.getGroupExpenses(req.params.groupId);
+    const expenses = await expenseService.getGroupExpenses(
+      req.params.groupId,
+      req.user.userId,
+    );
 
     res.status(200).json({
       status: "success",
@@ -45,13 +49,17 @@ const updateExpense = async (req, res) => {
   try {
     const { groupId, paidBy, description, amount, splitAmong } = req.body;
 
-    const expense = await expenseService.updateExpense(req.params.id, {
-      groupId,
-      paidBy,
-      description,
-      amount,
-      splitAmong,
-    });
+    const expense = await expenseService.updateExpense(
+      req.params.id,
+      {
+        groupId,
+        paidBy,
+        description,
+        amount,
+        splitAmong,
+      },
+      req.user.userId,
+    );
 
     res.status(200).json({
       status: "success",
@@ -68,7 +76,10 @@ const updateExpense = async (req, res) => {
 
 const deleteExpense = async (req, res) => {
   try {
-    const result = await expenseService.deleteExpense(req.params.id);
+    const result = await expenseService.deleteExpense(
+      req.params.id,
+      req.user.userId,
+    );
 
     res.status(200).json({
       status: "success",

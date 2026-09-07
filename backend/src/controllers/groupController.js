@@ -8,6 +8,7 @@ const createGroup = async (req, res) => {
       name,
       members,
       parentGroupId,
+      createdBy: req.user.userId,
     });
 
     res.status(201).json({
@@ -25,7 +26,7 @@ const createGroup = async (req, res) => {
 
 const getAllGroups = async (req, res) => {
   try {
-    const groups = await groupService.getAllGroups();
+    const groups = await groupService.getAllGroups(req.user.userId);
 
     res.status(200).json({
       status: "success",
@@ -41,7 +42,10 @@ const getAllGroups = async (req, res) => {
 
 const getGroupById = async (req, res) => {
   try {
-    const group = await groupService.getGroupById(req.params.id);
+    const group = await groupService.getGroupById(
+      req.params.id,
+      req.user.userId,
+    );
 
     res.status(200).json({
       status: "success",
@@ -59,7 +63,11 @@ const updateGroupMembers = async (req, res) => {
   try {
     const { members } = req.body;
 
-    const group = await groupService.updateGroupMembers(req.params.id, members);
+    const group = await groupService.updateGroupMembers(
+      req.params.id,
+      members,
+      req.user.userId,
+    );
 
     res.status(200).json({
       status: "success",
@@ -78,11 +86,15 @@ const updateGroup = async (req, res) => {
   try {
     const { name, members, parentGroupId } = req.body;
 
-    const group = await groupService.updateGroup(req.params.id, {
-      name,
-      members,
-      parentGroupId,
-    });
+    const group = await groupService.updateGroup(
+      req.params.id,
+      {
+        name,
+        members,
+        parentGroupId,
+      },
+      req.user.userId,
+    );
 
     res.status(200).json({
       status: "success",
@@ -99,7 +111,10 @@ const updateGroup = async (req, res) => {
 
 const deleteGroup = async (req, res) => {
   try {
-    const result = await groupService.deleteGroup(req.params.id);
+    const result = await groupService.deleteGroup(
+      req.params.id,
+      req.user.userId,
+    );
 
     res.status(200).json({
       status: "success",

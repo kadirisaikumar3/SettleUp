@@ -266,6 +266,9 @@ function App() {
   // --------------------------------------------------
   const selectedGroup = groups.find((group) => group._id === selectedGroupId);
 
+  const isGroupOwner =
+    selectedGroup?.createdBy?.toString() === currentUser?.id?.toString();
+
   // --------------------------------------------------
   // Load selected group details
   // --------------------------------------------------
@@ -752,6 +755,131 @@ function App() {
           </div>
         </section>
 
+        {/* Create Group Form */}
+        {showGroupForm && (
+          <div className="expense-form-card">
+            <div className="expense-form-header">
+              <div>
+                <span className="eyebrow">NEW GROUP</span>
+                <h3>Create a group</h3>
+              </div>
+
+              <button
+                type="button"
+                className="expense-cancel-button"
+                onClick={() => {
+                  setShowGroupForm(false);
+                  setError("");
+
+                  setGroupForm({
+                    name: "",
+                    parentGroupId: "",
+                    members: [],
+                  });
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+
+            <div className="expense-form-body">
+              <label className="form-field">
+                <span>Group name</span>
+                <input
+                  type="text"
+                  placeholder="Enter group name"
+                  value={groupForm.name}
+                  onChange={(event) =>
+                    setGroupForm({
+                      ...groupForm,
+                      name: event.target.value,
+                    })
+                  }
+                />
+              </label>
+
+              <label className="form-field">
+                <span>Parent group</span>
+                <select
+                  value={groupForm.parentGroupId}
+                  onChange={(event) =>
+                    setGroupForm({
+                      ...groupForm,
+                      parentGroupId: event.target.value,
+                    })
+                  }
+                >
+                  <option value="">No parent — Root group</option>
+
+                  {groups.map((group) => (
+                    <option key={group._id} value={group._id}>
+                      {group.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <div className="form-field">
+                <span>Members</span>
+
+                <div className="member-checkbox-list">
+                  {users.map((user) => (
+                    <label key={user._id} className="member-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={groupForm.members.includes(user._id)}
+                        onChange={(event) => {
+                          const userId = user._id;
+
+                          setGroupForm((currentForm) => ({
+                            ...currentForm,
+                            members: event.target.checked
+                              ? [...currentForm.members, userId]
+                              : currentForm.members.filter(
+                                  (id) => id !== userId,
+                                ),
+                          }));
+                        }}
+                      />
+
+                      <span>{user.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {error && <p className="form-error">{error}</p>}
+
+              <div className="expense-form-actions">
+                <button
+                  type="button"
+                  className="expense-cancel-button"
+                  onClick={() => {
+                    setShowGroupForm(false);
+                    setError("");
+
+                    setGroupForm({
+                      name: "",
+                      parentGroupId: "",
+                      members: [],
+                    });
+                  }}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="button"
+                  className="add-expense-button"
+                  onClick={handleCreateGroup}
+                >
+                  Create Group
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* ==================================================
             SELECTED GROUP DETAILS
         ================================================== */}
@@ -768,39 +896,44 @@ function App() {
                   <span className="loading-text">Updating...</span>
                 )}
 
-                <button
-                  type="button"
-                  className="add-expense-button"
-                  onClick={() => {
-                    if (!selectedGroup) {
-                      return;
-                    }
+                {isGroupOwner && (
+                  <>
+                    <button
+                      type="button"
+                      className="add-expense-button"
+                      onClick={() => {
+                        if (!selectedGroup) {
+                          return;
+                        }
 
-                    setEditGroupForm({
-                      name: selectedGroup.name || "",
-                      parentGroupId: selectedGroup.parentGroupId || "",
-                      members:
-                        selectedGroup.members?.map((member) => member._id) ||
-                        [],
-                    });
+                        setEditGroupForm({
+                          name: selectedGroup.name || "",
+                          parentGroupId: selectedGroup.parentGroupId || "",
+                          members:
+                            selectedGroup.members?.map(
+                              (member) => member._id,
+                            ) || [],
+                        });
 
-                    setEditGroupError("");
-                    setEditGroupSuccess("");
-                    setShowEditGroupForm(true);
-                    setShowGroupForm(false);
-                    setShowExpenseForm(false);
-                  }}
-                >
-                  ✎ Edit Group
-                </button>
+                        setEditGroupError("");
+                        setEditGroupSuccess("");
+                        setShowEditGroupForm(true);
+                        setShowGroupForm(false);
+                        setShowExpenseForm(false);
+                      }}
+                    >
+                      ✎ Edit Group
+                    </button>
 
-                <button
-                  type="button"
-                  className="add-expense-button delete-group-button"
-                  onClick={handleDeleteGroup}
-                >
-                  🗑 Delete Group
-                </button>
+                    <button
+                      type="button"
+                      className="add-expense-button delete-group-button"
+                      onClick={handleDeleteGroup}
+                    >
+                      🗑 Delete Group
+                    </button>
+                  </>
+                )}
 
                 <button
                   type="button"
@@ -826,131 +959,6 @@ function App() {
                 </button>
               </div>
             </div>
-
-            {/* Create Group Form */}
-            {showGroupForm && (
-              <div className="expense-form-card">
-                <div className="expense-form-header">
-                  <div>
-                    <span className="eyebrow">NEW GROUP</span>
-                    <h3>Create a group</h3>
-                  </div>
-
-                  <button
-                    type="button"
-                    className="expense-cancel-button"
-                    onClick={() => {
-                      setShowGroupForm(false);
-                      setError("");
-
-                      setGroupForm({
-                        name: "",
-                        parentGroupId: "",
-                        members: [],
-                      });
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-
-                <div className="expense-form-body">
-                  <label className="form-field">
-                    <span>Group name</span>
-                    <input
-                      type="text"
-                      placeholder="Enter group name"
-                      value={groupForm.name}
-                      onChange={(event) =>
-                        setGroupForm({
-                          ...groupForm,
-                          name: event.target.value,
-                        })
-                      }
-                    />
-                  </label>
-
-                  <label className="form-field">
-                    <span>Parent group</span>
-                    <select
-                      value={groupForm.parentGroupId}
-                      onChange={(event) =>
-                        setGroupForm({
-                          ...groupForm,
-                          parentGroupId: event.target.value,
-                        })
-                      }
-                    >
-                      <option value="">No parent — Root group</option>
-
-                      {groups.map((group) => (
-                        <option key={group._id} value={group._id}>
-                          {group.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <div className="form-field">
-                    <span>Members</span>
-
-                    <div className="member-checkbox-list">
-                      {users.map((user) => (
-                        <label key={user._id} className="member-checkbox">
-                          <input
-                            type="checkbox"
-                            checked={groupForm.members.includes(user._id)}
-                            onChange={(event) => {
-                              const userId = user._id;
-
-                              setGroupForm((currentForm) => ({
-                                ...currentForm,
-                                members: event.target.checked
-                                  ? [...currentForm.members, userId]
-                                  : currentForm.members.filter(
-                                      (id) => id !== userId,
-                                    ),
-                              }));
-                            }}
-                          />
-
-                          <span>{user.name}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {error && <p className="form-error">{error}</p>}
-
-                  <div className="expense-form-actions">
-                    <button
-                      type="button"
-                      className="expense-cancel-button"
-                      onClick={() => {
-                        setShowGroupForm(false);
-                        setError("");
-
-                        setGroupForm({
-                          name: "",
-                          parentGroupId: "",
-                          members: [],
-                        });
-                      }}
-                    >
-                      Cancel
-                    </button>
-
-                    <button
-                      type="button"
-                      className="add-expense-button"
-                      onClick={handleCreateGroup}
-                    >
-                      Create Group
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
 
             {/* Edit Group Form */}
             {showEditGroupForm && (
@@ -1533,63 +1541,64 @@ function App() {
         )}
 
         {/* ==================================================
-            SETTLEMENTS
-        ================================================== */}
-        <section id="settlements" className="section">
-          <div className="section-heading">
-            <div>
-              <span className="eyebrow">OPTIMIZED SETTLEMENT</span>
-              <h2>Minimum transactions</h2>
+    SETTLEMENTS
+================================================== */}
+        {selectedGroup && (
+          <section id="settlements" className="section">
+            <div className="section-heading">
+              <div>
+                <span className="eyebrow">OPTIMIZED SETTLEMENT</span>
+                <h2>Minimum transactions</h2>
+              </div>
             </div>
-          </div>
 
-          {detailsLoading ? (
-            <div className="empty-state">
-              <h3>Calculating settlements...</h3>
-              <p>Running the settlement engine for the selected group.</p>
-            </div>
-          ) : settlement?.settlements?.length > 0 ? (
-            <div className="settlement-list">
-              {settlement.settlements.map((item, index) => (
-                <div
-                  className="settlement-card"
-                  key={`${item.from}-${item.to}-${index}`}
-                >
-                  <div className="settlement-person">
-                    <div className="mini-avatar">
-                      {getPersonName(item.from).charAt(0).toUpperCase()}
+            {detailsLoading ? (
+              <div className="empty-state">
+                <h3>Calculating settlements...</h3>
+                <p>Running the settlement engine for the selected group.</p>
+              </div>
+            ) : settlement?.settlements?.length > 0 ? (
+              <div className="settlement-list">
+                {settlement.settlements.map((item, index) => (
+                  <div
+                    className="settlement-card"
+                    key={`${item.from}-${item.to}-${index}`}
+                  >
+                    <div className="settlement-person">
+                      <div className="mini-avatar">
+                        {getPersonName(item.from).charAt(0).toUpperCase()}
+                      </div>
+
+                      <strong>{getPersonName(item.from)}</strong>
                     </div>
 
-                    <strong>{getPersonName(item.from)}</strong>
-                  </div>
-
-                  <div className="settlement-arrow">
-                    <span>pays</span>
-                    <strong>→</strong>
-                  </div>
-
-                  <div className="settlement-person">
-                    <div className="mini-avatar">
-                      {getPersonName(item.to).charAt(0).toUpperCase()}
+                    <div className="settlement-arrow">
+                      <span>pays</span>
+                      <strong>→</strong>
                     </div>
 
-                    <strong>{getPersonName(item.to)}</strong>
-                  </div>
+                    <div className="settlement-person">
+                      <div className="mini-avatar">
+                        {getPersonName(item.to).charAt(0).toUpperCase()}
+                      </div>
 
-                  <div className="settlement-amount">
-                    {formatAmount(item.amount)}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="empty-state">
-              <h3>All settled up 🎉</h3>
-              <p>There are no outstanding transactions for this group.</p>
-            </div>
-          )}
-        </section>
+                      <strong>{getPersonName(item.to)}</strong>
+                    </div>
 
+                    <div className="settlement-amount">
+                      {formatAmount(item.amount)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="empty-state">
+                <h3>All settled up 🎉</h3>
+                <p>There are no outstanding transactions for this group.</p>
+              </div>
+            )}
+          </section>
+        )}
         {/* ==================================================
             DSA
         ================================================== */}
