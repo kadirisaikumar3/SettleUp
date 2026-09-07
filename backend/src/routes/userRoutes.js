@@ -6,12 +6,14 @@ const {
   getUserById,
 } = require("../controllers/userController");
 
+const authenticate = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
 router.post("/", createUser);
 
-router.get("/", getAllUsers);
+router.get("/", authenticate, getAllUsers);
 
-router.get("/:id", getUserById);
+router.get("/:id", authenticate, getUserById);
 
 module.exports = router;

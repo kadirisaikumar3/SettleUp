@@ -7,7 +7,11 @@ const {
   deleteExpense,
 } = require("../controllers/expenseController");
 
+const authenticate = require("../middleware/authMiddleware");
+
 const router = express.Router();
+
+router.use(authenticate);
 
 router.post("/", createExpense);
 
