@@ -115,13 +115,15 @@ function App() {
 
       setEditExpenseSuccess("Expense updated successfully");
 
-      const expensesResponse = await getGroupExpenses(selectedGroupId);
+      const [expensesResponse, balanceResponse, settlementResponse] =
+        await Promise.all([
+          getGroupExpenses(selectedGroupId),
+          getGroupBalances(selectedGroupId),
+          getGroupSettlement(selectedGroupId),
+        ]);
+
       setExpenses(expensesResponse.data || []);
-
-      const balanceResponse = await getGroupBalances(selectedGroupId);
       setBalances(balanceResponse.data || null);
-
-      const settlementResponse = await getGroupSettlement(selectedGroupId);
       setSettlement(settlementResponse.data || null);
 
       setTimeout(() => {
@@ -158,13 +160,15 @@ function App() {
 
       setDeleteExpenseSuccess("Expense deleted successfully");
 
-      const expensesResponse = await getGroupExpenses(selectedGroupId);
+      const [expensesResponse, balanceResponse, settlementResponse] =
+        await Promise.all([
+          getGroupExpenses(selectedGroupId),
+          getGroupBalances(selectedGroupId),
+          getGroupSettlement(selectedGroupId),
+        ]);
+
       setExpenses(expensesResponse.data || []);
-
-      const balanceResponse = await getGroupBalances(selectedGroupId);
       setBalances(balanceResponse.data || null);
-
-      const settlementResponse = await getGroupSettlement(selectedGroupId);
       setSettlement(settlementResponse.data || null);
     } catch (err) {
       setError(err.message || "Failed to delete expense");
