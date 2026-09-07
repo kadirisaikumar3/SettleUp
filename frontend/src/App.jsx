@@ -14,9 +14,24 @@ import {
   deleteExpense,
 } from "./services/api";
 
+import Auth from "./components/Auth";
+
 import "./App.css";
 
 function App() {
+  const [currentUser, setCurrentUser] = useState(() => {
+    const savedUser = localStorage.getItem("settleup_user");
+
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+
+  const handleLogout = () => {
+    localStorage.removeItem("settleup_token");
+    localStorage.removeItem("settleup_user");
+
+    setCurrentUser(null);
+  };
+
   const [groups, setGroups] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState(null);
 
@@ -218,9 +233,14 @@ function App() {
       }
     };
 
-    loadGroups();
-  }, []);
+    if (currentUser) {
+      loadGroups();
+    }
+  }, [currentUser]);
 
+  // --------------------------------------------------
+  // Load all users
+  // --------------------------------------------------
   useEffect(() => {
     const loadUsers = async () => {
       try {
@@ -231,8 +251,10 @@ function App() {
       }
     };
 
-    loadUsers();
-  }, []);
+    if (currentUser) {
+      loadUsers();
+    }
+  }, [currentUser]);
 
   // --------------------------------------------------
   // Root groups
@@ -458,7 +480,7 @@ function App() {
     return userBalance?.balance || 0;
   };
 
-  const saiBalance = getBalanceForUser("Sai");
+  const currentUserBalance = getBalanceForUser(currentUser?.name);
 
   const handleAddExpense = async () => {
     setExpenseError("");
@@ -580,6 +602,11 @@ function App() {
   // --------------------------------------------------
   // Loading state
   // --------------------------------------------------
+
+  if (!currentUser) {
+    return <Auth onLogin={setCurrentUser} />;
+  }
+
   if (loading) {
     return (
       <div className="app-loading">
@@ -615,8 +642,19 @@ function App() {
         </div>
 
         <div className="navbar-profile">
-          <div className="profile-avatar">S</div>
-          <span>Sai</span>
+          <div className="profile-avatar">
+            {currentUser?.name?.charAt(0).toUpperCase()}
+          </div>
+
+          <span>{currentUser?.name}</span>
+
+          <button
+            type="button"
+            className="logout-button"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
         </div>
       </nav>
 
@@ -664,17 +702,17 @@ function App() {
 
             <div
               className={`hero-balance ${
-                saiBalance >= 0 ? "positive" : "negative"
+                currentUserBalance >= 0 ? "positive" : "negative"
               }`}
             >
-              {saiBalance >= 0 ? "+" : "-"}
-              {formatAmount(Math.abs(saiBalance))}
+              {currentUserBalance >= 0 ? "+" : "-"}
+              {formatAmount(Math.abs(currentUserBalance))}
             </div>
 
             <p>
-              {saiBalance > 0
+              {currentUserBalance > 0
                 ? "You are owed"
-                : saiBalance < 0
+                : currentUserBalance < 0
                   ? "You owe"
                   : "All settled up"}
             </p>
