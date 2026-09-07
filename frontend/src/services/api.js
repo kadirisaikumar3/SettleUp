@@ -16,6 +16,15 @@ const apiRequest = async (endpoint, options = {}) => {
   const data = await response.json();
 
   if (!response.ok) {
+    if (response.status === 401) {
+      localStorage.removeItem("settleup_token");
+      localStorage.removeItem("settleup_user");
+
+      window.location.reload();
+
+      throw new Error("Your session has expired. Please sign in again.");
+    }
+
     throw new Error(data.message || "Something went wrong");
   }
 
