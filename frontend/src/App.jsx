@@ -474,18 +474,18 @@ function App() {
   };
 
   const getBalanceForUser = (userId) => {
-  if (!Array.isArray(balances) || !userId) {
-    return 0;
-  }
+    if (!Array.isArray(balances) || !userId) {
+      return 0;
+    }
 
-  const userBalance = balances.find(
-    (balance) => balance.userId?.toString() === userId.toString(),
-  );
+    const userBalance = balances.find(
+      (balance) => balance.userId?.toString() === userId.toString(),
+    );
 
-  return userBalance?.balance || 0;
-};
+    return userBalance?.balance || 0;
+  };
 
-const currentUserBalance = getBalanceForUser(currentUser?.id);
+  const currentUserBalance = getBalanceForUser(currentUser?.id);
 
   const handleAddExpense = async () => {
     setExpenseError("");
@@ -501,7 +501,9 @@ const currentUserBalance = getBalanceForUser(currentUser?.id);
       return;
     }
 
-    if (!expenseForm.amount || Number(expenseForm.amount) <= 0) {
+    const expenseAmount = Number(expenseForm.amount);
+
+    if (!Number.isFinite(expenseAmount) || expenseAmount <= 0) {
       setExpenseError("Please enter a valid amount.");
       return;
     }
@@ -525,7 +527,7 @@ const currentUserBalance = getBalanceForUser(currentUser?.id);
         groupId: selectedGroupId,
         paidBy: expenseForm.paidBy,
         description: expenseForm.description.trim(),
-        amount: Number(expenseForm.amount),
+        amount: expenseAmount,
         splitAmong: expenseForm.splitAmong,
       });
 
