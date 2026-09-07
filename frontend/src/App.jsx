@@ -381,7 +381,7 @@ function App() {
       setEditGroupSuccess("");
 
       await updateGroup(selectedGroup._id, {
-        name: editGroupForm.name,
+        name: editGroupForm.name.trim(),
         members: editGroupForm.members,
         parentGroupId: editGroupForm.parentGroupId || null,
       });
