@@ -12,7 +12,16 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://settle-up-sage.vercel.app",
+];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+  }),
+);
 app.use(express.json());
 
 app.use("/api/groups", groupRoutes);
