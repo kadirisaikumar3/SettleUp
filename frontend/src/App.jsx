@@ -473,17 +473,19 @@ function App() {
     return "Unknown";
   };
 
-  const getBalanceForUser = (userName) => {
-    if (!Array.isArray(balances)) {
-      return 0;
-    }
+  const getBalanceForUser = (userId) => {
+  if (!Array.isArray(balances) || !userId) {
+    return 0;
+  }
 
-    const userBalance = balances.find((balance) => balance.name === userName);
+  const userBalance = balances.find(
+    (balance) => balance.userId?.toString() === userId.toString(),
+  );
 
-    return userBalance?.balance || 0;
-  };
+  return userBalance?.balance || 0;
+};
 
-  const currentUserBalance = getBalanceForUser(currentUser?.name);
+const currentUserBalance = getBalanceForUser(currentUser?.id);
 
   const handleAddExpense = async () => {
     setExpenseError("");
