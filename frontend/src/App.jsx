@@ -186,6 +186,7 @@ function App() {
   const [showEditGroupForm, setShowEditGroupForm] = useState(false);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteGroupSubmitting, setDeleteGroupSubmitting] = useState(false);
 
   const [editGroupForm, setEditGroupForm] = useState({
     name: "",
@@ -428,8 +429,8 @@ function App() {
     }
 
     try {
+      setDeleteGroupSubmitting(true);
       setError("");
-
       await deleteGroup(selectedGroup._id);
 
       const response = await getGroups();
@@ -455,6 +456,8 @@ function App() {
     } catch (err) {
       setShowDeleteModal(false);
       setError(err.message || "Failed to delete group");
+    } finally {
+      setDeleteGroupSubmitting(false);
     }
   };
 
@@ -1708,9 +1711,10 @@ function App() {
               <button
                 type="button"
                 className="confirm-delete-button"
+                disabled={deleteGroupSubmitting}
                 onClick={confirmDeleteGroup}
               >
-                🗑 Delete Group
+                {deleteGroupSubmitting ? "Deleting..." : "🗑 Delete Group"}
               </button>
             </div>
           </div>
