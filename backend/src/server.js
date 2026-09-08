@@ -22,7 +22,7 @@ app.use(
     origin: allowedOrigins,
   }),
 );
-app.use(express.json());
+app.use(express.json({ limit: "10kb" }));
 
 app.use("/api/groups", groupRoutes);
 app.use("/api/users", userRoutes);
