@@ -103,3 +103,31 @@ describe("calculateSettlements", () => {
     }
   });
 });
+test("should settle one creditor with multiple debtors", () => {
+  const balances = new Map([
+    ["Sai", 2500],
+    ["Deepa", -1000],
+    ["Siri", -800],
+    ["Kumar", -700],
+  ]);
+
+  const settlements = calculateSettlements(balances);
+
+  expect(settlements).toEqual([
+    {
+      from: "Deepa",
+      to: "Sai",
+      amount: 1000,
+    },
+    {
+      from: "Siri",
+      to: "Sai",
+      amount: 800,
+    },
+    {
+      from: "Kumar",
+      to: "Sai",
+      amount: 700,
+    },
+  ]);
+});

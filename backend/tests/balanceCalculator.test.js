@@ -41,3 +41,10 @@ describe("calculateBalances", () => {
     expect(totalBalance).toBe(0);
   });
 });
+test("should return an empty balance map when there are no expenses", () => {
+  const expenses = [];
+
+  const balances = calculateBalances(expenses);
+
+  expect(balances.size).toBe(0);
+});

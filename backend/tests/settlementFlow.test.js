@@ -41,4 +41,46 @@ describe("Complete Settlement Flow", () => {
 
     expect(settlements).toEqual([]);
   });
+
+  test("should settle multiple creditors and debtors correctly", () => {
+    const expenses = [
+      {
+        paidBy: "Sai",
+        amount: 600,
+        splitAmong: ["Sai", "Deepa", "Siri", "Kumar"],
+      },
+      {
+        paidBy: "Deepa",
+        amount: 400,
+        splitAmong: ["Sai", "Deepa", "Siri", "Kumar"],
+      },
+    ];
+
+    const balances = calculateBalances(expenses);
+
+    expect(balances.get("Sai")).toBe(350);
+    expect(balances.get("Deepa")).toBe(150);
+    expect(balances.get("Siri")).toBe(-250);
+    expect(balances.get("Kumar")).toBe(-250);
+
+    const settlements = calculateSettlements(balances);
+
+    expect(settlements).toEqual([
+      {
+        from: "Siri",
+        to: "Sai",
+        amount: 250,
+      },
+      {
+        from: "Kumar",
+        to: "Deepa",
+        amount: 150,
+      },
+      {
+        from: "Kumar",
+        to: "Sai",
+        amount: 100,
+      },
+    ]);
+  });
 });
