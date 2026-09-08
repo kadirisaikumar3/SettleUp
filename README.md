@@ -6,408 +6,609 @@ SettleUp is a full-stack expense management application that models shared group
 
 The project focuses on solving the core expense-settlement problem efficiently using HashMaps, Trees, DFS, Max Heaps, and Greedy Algorithms.
 
-🚀 Features
+---
 
-Create and manage groups
+## 🚀 Features
 
-Create nested sub-groups
+- Create and manage groups
+- Create nested sub-groups
+- Add shared expenses
+- Edit expenses
+- Delete expenses
+- Select the person who paid
+- Split expenses among group members
+- Calculate individual balances
+- Aggregate expenses across nested groups
+- Generate optimized settlement transactions
+- Prevent invalid group hierarchies
+- Protect DFS traversal from circular hierarchies
+- Validate expense amounts and participants
+- Display success and error states
+- Persistent data using MongoDB
+- JWT-based authentication
+- Backend-enforced authorization
+- Authentication rate limiting
+- Automated backend tests using Jest
 
-Add shared expenses
+---
 
-Edit expenses
+## 🧠 Core DSA
 
-Delete expenses
+SettleUp is designed around practical Data Structures and Algorithms concepts.
 
-Select the person who paid
+### HashMap
 
-Split expenses among group members
+A JavaScript `Map` is used to maintain each user's running balance while processing expenses.
 
-Calculate individual balances
+Example:
 
-Aggregate expenses across nested groups
+```text
+User    → Balance
 
-Generate optimized settlement transactions
+Sai     → +₹1600
+Deepa   → -₹50
+Siri    → -₹1550
+```
 
-Prevent invalid group hierarchies
-
-Protect DFS traversal from circular hierarchies
-
-Validate expense amounts and participants
-
-Display success and error states
-
-Persistent data using MongoDB
-
-Automated backend tests using Jest
-
-🧠 Core DSA
-
-SettleUp is designed around practical DSA concepts.
-
-HashMap
-
-A Map is used to maintain each user's running balance while processing expenses.
-
-User → Balance
-Sai → +1600
-Deepa → -50
-Siri → -1550
-
-Tree
+### Tree
 
 Groups and sub-groups are modeled as a hierarchical tree.
 
+Example:
+
+```text
 Trio
 ├── Sightseeing Places
-│ ├── Mysore Palace
-│ ├── Halebeedu
-│ ├── Chennakesava Swamy Temple
-│ ├── Shivanasamudra Waterfalls
-│ └── Karanji Lake
+│   ├── Mysore Palace
+│   ├── Halebeedu
+│   ├── Chennakesava Swamy Temple
+│   ├── Shivanasamudra Waterfalls
+│   └── Karanji Lake
 ├── Food
-│ ├── Malgudi Cafe
-│ └── RRR Restaurant
+│   ├── Malgudi Cafe
+│   └── RRR Restaurant
 ├── Museum
-│ └── Pioneer Car Museum
+│   └── Pioneer Car Museum
 └── Places
-└── Postal Training Centre
+    └── Postal Training Centre
+```
 
-DFS — Depth-First Search
+### DFS — Depth-First Search
 
 DFS traverses the selected group and all nested child groups to aggregate expenses across the complete subtree.
 
-A Set is used to protect the traversal from infinite recursion if corrupted hierarchical data contains circular references.
+A `Set` is used to protect the traversal from infinite recursion if corrupted hierarchical data contains circular references.
 
-Max Heap
+### Max Heap
 
-Two max heaps are used during settlement:
+Two Max Heaps are used during settlement:
 
-Creditors — members who should receive money
-
-Debtors — members who should pay money
+- **Creditors** — members who should receive money
+- **Debtors** — members who should pay money
 
 The largest creditor and largest debtor are repeatedly matched.
 
-Greedy Algorithm
+### Greedy Algorithm
 
 The settlement engine greedily matches the largest outstanding creditor with the largest outstanding debtor to reduce the number of transactions.
 
-⚖️ Settlement Example
+---
+
+## ⚖️ Settlement Example
 
 Suppose the calculated balances are:
 
-Sai → +₹1600
+```text
+Sai   → +₹1600
 Deepa → -₹50
-Siri → -₹1550
+Siri  → -₹1550
+```
 
 The optimized settlement becomes:
 
-Siri → Sai ₹1550
-Deepa → Sai ₹50
+```text
+Siri  → Sai    ₹1550
+Deepa → Sai    ₹50
+```
 
 Instead of generating unnecessary pairwise transactions, the algorithm directly matches debtors and creditors.
 
-🏗️ Architecture
+---
 
+## 🏗️ Architecture
+
+```text
 ┌──────────────────────────┐
-│ React + Vite │
-│ Frontend │
-│ Vercel │
+│       React + Vite       │
+│        Frontend          │
+│          Vercel          │
 └────────────┬─────────────┘
-│
-│ REST API
-▼
+             │
+             │ REST API
+             ▼
 ┌──────────────────────────┐
-│ Node.js + Express │
-│ Backend │
-│ Render │
+│     Node.js + Express    │
+│         Backend          │
+│          Render          │
 └────────────┬─────────────┘
-│
-▼
+             │
+             ▼
 ┌──────────────────────────┐
-│ MongoDB Atlas │
-│ Database │
+│       MongoDB Atlas      │
+│         Database         │
 └──────────────────────────┘
+```
 
-🛠️ Tech Stack
+---
 
-Frontend
+## 🛠️ Tech Stack
 
-React.js
+### Frontend
 
-Vite
+- React.js
+- Vite
+- JavaScript
+- HTML5
+- CSS3
 
-JavaScript
+### Backend
 
-HTML5
+- Node.js
+- Express.js
+- REST APIs
 
-CSS3
+### Database
 
-Backend
+- MongoDB
+- MongoDB Atlas
+- Mongoose
 
-Node.js
+### Authentication & Security
 
-Express.js
+- JWT
+- bcrypt
+- Express Rate Limit
+- Environment Variables
+- Backend Authorization
 
-REST APIs
+### Algorithms & Testing
 
-Database
+- HashMap
+- Tree
+- DFS
+- Max Heap
+- Greedy Algorithm
+- Jest
 
-MongoDB
+### Deployment & Tools
 
-MongoDB Atlas
+- Vercel
+- Render
+- Git
+- GitHub
+- VS Code
+- Thunder Client
 
-Mongoose
+---
 
-Algorithms & Testing
+## 🔐 Authentication & Security
 
-HashMap
+SettleUp uses JWT-based authentication and backend-enforced authorization.
 
-Tree
+### Authentication
 
-DFS
+- User registration with input validation
+- Passwords hashed using bcrypt
+- JWT issued after successful login
+- Protected API routes require a Bearer token
+- Password fields are excluded from normal user queries
 
-Max Heap
+### Authorization
 
-Greedy Algorithm
+- Users can access groups they own or belong to
+- Only group owners can edit or delete groups
+- Group members can manage expenses according to the application's access policy
+- Backend services verify group access before sensitive operations
+- Nested group creation and updates verify access to the parent group
 
-Jest
+### Security Hardening
 
-Deployment & Tools
+- JSON request bodies limited to 10 KB
+- Authentication endpoints are rate-limited
+- JWT secrets and database credentials are stored in environment variables
+- Environment files are excluded from Git
+- Circular group hierarchies are protected during DFS traversal
 
-Vercel
+---
 
-Render
+## 📁 Project Structure
 
-Git
-
-GitHub
-
-VS Code
-
-Thunder Client
-
-📁 Project Structure
-
+```text
 SettleUp/
 ├── backend/
-│ ├── src/
-│ │ ├── algorithms/
-│ │ ├── config/
-│ │ ├── controllers/
-│ │ ├── models/
-│ │ ├── routes/
-│ │ ├── services/
-│ │ └── server.js
-│ ├── tests/
-│ ├── .env.example
-│ └── package.json
+│   ├── src/
+│   │   ├── algorithms/
+│   │   ├── config/
+│   │   ├── controllers/
+│   │   ├── middleware/
+│   │   ├── models/
+│   │   ├── routes/
+│   │   ├── services/
+│   │   └── server.js
+│   ├── tests/
+│   ├── .env.example
+│   └── package.json
+│
 ├── frontend/
-│ ├── src/
-│ └── package.json
+│   ├── src/
+│   └── package.json
+│
 ├── tests/
 ├── docs/
 ├── .gitignore
 └── README.md
+```
 
-💰 Expense Processing Flow
+---
 
+## 🔌 API Overview
+
+### Authentication
+
+| Method | Endpoint             | Description                      |
+| ------ | -------------------- | -------------------------------- |
+| POST   | `/api/auth/register` | Register a new user              |
+| POST   | `/api/auth/login`    | Authenticate user and return JWT |
+
+### Groups
+
+| Method | Endpoint          | Description                                         |
+| ------ | ----------------- | --------------------------------------------------- |
+| GET    | `/api/groups`     | Get groups accessible to the authenticated user     |
+| POST   | `/api/groups`     | Create a group                                      |
+| GET    | `/api/groups/:id` | Get a specific accessible group                     |
+| PUT    | `/api/groups/:id` | Update an owned group                               |
+| DELETE | `/api/groups/:id` | Delete an owned group when no dependent data exists |
+
+### Expenses
+
+| Method | Endpoint            | Description             |
+| ------ | ------------------- | ----------------------- |
+| GET    | `/api/expenses`     | Get accessible expenses |
+| POST   | `/api/expenses`     | Create an expense       |
+| PUT    | `/api/expenses/:id` | Update an expense       |
+| DELETE | `/api/expenses/:id` | Delete an expense       |
+
+### Settlements
+
+| Method | Endpoint                          | Description                                              |
+| ------ | --------------------------------- | -------------------------------------------------------- |
+| GET    | `/api/settlements/group/:groupId` | Calculate balances and optimized settlements for a group |
+
+All protected endpoints require:
+
+```text
+Authorization: Bearer <JWT>
+```
+
+The backend validates authentication and authorization before performing protected operations.
+
+---
+
+## 💰 Expense Processing Flow
+
+```text
 User creates expense
-↓
+        ↓
 Validate group, payer and participants
-↓
+        ↓
 Store expense in MongoDB
-↓
+        ↓
 Collect expenses from selected group subtree
-↓
+        ↓
 DFS traverses nested groups
-↓
+        ↓
 HashMap calculates user balances
-↓
+        ↓
 Separate creditors and debtors
-↓
+        ↓
 Max Heaps select largest balances
-↓
+        ↓
 Greedy matching generates settlements
-↓
+        ↓
 Display optimized transactions
+```
 
-🧪 Testing
+---
+
+## 🧪 Testing
 
 Backend tests are implemented using Jest.
 
-Current Test Status
+### Current Test Status
 
-Test Suites: 5 passed, 5 total
-Tests: 17 passed, 17 total
+```text
+Test Suites: 6 passed, 6 total
+Tests:       24 passed, 24 total
+```
 
-Tests cover:
+### Tests Cover
 
-Balance calculation
+- Balance calculation
+- Settlement calculation
+- Multiple creditors and debtors
+- Settlement balance preservation
+- Expense tree traversal
+- Nested group traversal
+- Empty expense handling
+- Decimal amounts
+- Circular hierarchy protection
+- Authentication token validation
+- Invalid JWT rejection
+- Protected expense endpoints
+- Protected settlement endpoints
 
-Settlement calculation
+### Run Tests
 
-Expense tree traversal
-
-Nested group traversal
-
-Empty expense handling
-
-Decimal rounding
-
-Circular hierarchy protection
-
-Run Tests
-
+```bash
 cd backend
 npm test
+```
 
-⚙️ Local Setup
+---
 
-1. Clone the repository
+## ⚙️ Local Setup
 
+### 1. Clone the Repository
+
+```bash
 git clone https://github.com/kadirisaikumar3/SettleUp.git
 cd SettleUp
+```
 
-2. Backend
+### 2. Backend Setup
 
+```bash
 cd backend
 npm install
+```
 
-Create a .env file:
+Create a `.env` file inside the `backend/` directory:
 
+```env
 PORT=5000
 MONGODB_URI=your_mongodb_connection_string
 NODE_ENV=development
+JWT_SECRET=your_jwt_secret_here
+```
 
 Start the backend:
 
+```bash
 npm start
+```
 
 For development:
 
+```bash
 npm run dev
+```
 
-3. Frontend
+### 3. Frontend Setup
 
 Open another terminal:
 
+```bash
 cd frontend
 npm install
 npm run dev
+```
 
-🔐 Environment Variables
+The frontend runs locally at:
 
-Backend
+```text
+http://localhost:5173
+```
 
+The backend runs locally at:
+
+```text
+http://localhost:5000
+```
+
+---
+
+## 🔐 Environment Variables
+
+### Backend
+
+```env
 PORT=5000
 MONGODB_URI=your_mongodb_connection_string
 NODE_ENV=development
+JWT_SECRET=your_jwt_secret_here
+```
 
-Frontend
+### Frontend
 
 For production:
 
+```env
 VITE_API_URL=https://settleup-uiyc.onrender.com/api
+```
 
-Never commit .env files or database credentials to GitHub.
+Never commit `.env` files or database credentials to GitHub.
 
-🌐 Production Deployment
+---
 
-Frontend — Vercel
+## 🌐 Production Deployment
 
-Live Demo:
-https://settle-up-sage.vercel.app
+SettleUp is deployed using Vercel, Render, and MongoDB Atlas.
 
-Backend — Render
+### Frontend — Vercel
 
-API:
+Live application:
+
+https://settle-up-sage.vercel.app/
+
+### Backend — Render
+
+Production API:
+
 https://settleup-uiyc.onrender.com
 
-Health Check
+### Health Check
 
+```text
 https://settleup-uiyc.onrender.com/api/health
+```
 
-Database — MongoDB Atlas
+The health endpoint confirms that the production backend is running successfully.
 
-The production backend connects to MongoDB Atlas using the MONGODB_URI environment variable.
+### Database — MongoDB Atlas
 
-📈 Algorithm Complexity
+The production backend connects to MongoDB Atlas using the `MONGODB_URI` environment variable.
 
-The settlement engine uses max heaps for creditors and debtors and a greedy matching strategy.
+### Deployment Architecture
 
-For n participants, the settlement calculation is designed around heap operations and runs in approximately:
+```text
+User
+  ↓
+Vercel
+  ↓
+React Frontend
+  ↓
+Render
+  ↓
+Express REST API
+  ↓
+MongoDB Atlas
+```
 
-O(n log n)
+---
 
-Expense aggregation uses DFS over the group hierarchy.
+## 📈 Algorithm Complexity
 
-DFS traversal: O(G + E)
+### Balance Calculation
 
-where:
+A HashMap (`Map`) maintains each user's running balance while processing expenses.
 
-G = number of groups in the traversed hierarchy
+- **Time:** O(P)
+- **Space:** O(U)
 
-E = number of expenses inspected during aggregation
+Where:
+
+- `P` = total number of participant entries across all expenses
+- `U` = number of unique users
+
+### Expense Tree Traversal
+
+The group hierarchy is traversed using DFS.
+
+Lookup maps are built for:
+
+- Parent group → child groups
+- Group → expenses
+
+This avoids repeatedly scanning the complete group and expense collections during traversal.
+
+- **Time:** O(G + E)
+- **Space:** O(G + E)
+
+Where:
+
+- `G` = number of groups
+- `E` = number of expenses
+
+### Settlement Calculation
+
+Creditors and debtors are stored in two Max Heaps.
+
+The largest creditor and largest debtor are repeatedly matched using a greedy strategy.
+
+- **Time:** O(U log U)
+- **Space:** O(U)
+
+The resulting settlement set minimizes unnecessary pairwise transactions for the application's equal-split settlement model.
 
 The project demonstrates how appropriate data structures can improve an expense-settlement workflow compared with naive pairwise transaction generation.
 
-🧩 Engineering Highlights
+---
 
-Designed a heap-based greedy algorithm to minimize group debt settlements from O(n²) pairwise transactions to approximately O(n log n).
+## 🧩 Engineering Highlights
 
-Implemented recursive tree traversal to aggregate expenses across nested sub-groups.
+- Designed a heap-based greedy algorithm to minimize group debt settlements from approximately O(n²) pairwise transaction generation to O(n log n)
+- Implemented recursive tree traversal to aggregate expenses across nested sub-groups
+- Optimized group expense traversal using lookup maps
+- Added cycle protection to prevent infinite DFS recursion from corrupted group hierarchies
+- Added validation for invalid expense amounts and duplicate participants
+- Implemented complete expense CRUD operations
+- Implemented group creation, editing, and safe deletion
+- Implemented JWT authentication and backend authorization
+- Added authentication rate limiting
+- Added request body size limits
+- Added automated Jest tests for core algorithms and edge cases
+- Connected a React frontend to a production Express REST API
+- Deployed frontend and backend independently for production
+- Verified authenticated and unauthorized access scenarios
 
-Added cycle protection to prevent infinite DFS recursion from corrupted group hierarchies.
+---
 
-Added validation for invalid expense amounts and duplicate participants.
-
-Implemented complete expense CRUD operations.
-
-Implemented group creation, editing and safe deletion.
-
-Added automated Jest tests for core algorithms and edge cases.
-
-Connected a React frontend to a production Express REST API.
-
-Deployed frontend and backend independently for production.
-
-🎯 Project Goal
+## 🎯 Project Goal
 
 The goal of SettleUp is to demonstrate how Data Structures and Algorithms can be applied to a real-world software engineering problem.
 
 The application models:
 
-Groups → Trees
-User balances → HashMaps
-Settlement participants → Max Heaps
-Transaction generation → Greedy Algorithm
+```text
+Groups
+  ↓
+Trees
 
-🚀 Project Status
+User balances
+  ↓
+HashMaps
 
-Production Ready
+Settlement participants
+  ↓
+Max Heaps
 
-Frontend → Vercel ✅
-Backend → Render ✅
-Database → MongoDB Atlas ✅
-REST APIs → Working ✅
-DSA Engine → Working ✅
-Automated Tests → 17/17 Passed ✅
-Production Flow → Verified ✅
+Transaction generation
+  ↓
+Greedy Algorithm
+```
 
-👨‍💻 Author
+---
 
-Saikumar Kadiri
+## 🚀 Project Status
 
-B.Tech — Computer Science Engineering
+### Production Ready
+
+- Frontend → Vercel ✅
+- Backend → Render ✅
+- Database → MongoDB Atlas ✅
+- REST APIs → Working ✅
+- Authentication & Authorization → Working ✅
+- DSA Engine → Working ✅
+- Automated Tests → 24/24 Passed ✅
+- Production Flow → Verified ✅
+- Security Hardening → Implemented ✅
+
+---
+
+## 👨‍💻 Author
+
+**Saikumar Kadiri**
+
+B.Tech — Computer Science Engineering  
 Madanapalle Institute of Technology and Science
 
-GitHub: https://github.com/kadirisaikumar3
+- GitHub: https://github.com/kadirisaikumar3
+- Portfolio: https://kadirisaikumar3.github.io/
+- LinkedIn: https://www.linkedin.com/in/saikumarkadiri/
 
-Portfolio: https://kadirisaikumar3.github.io/
+---
 
-LinkedIn: https://www.linkedin.com/in/saikumarkadiri/
+## ⭐ Support
 
-⭐ Support
-
-If you find this project useful or interesting, consider giving the repository a ⭐ on GitHub
+If you find this project useful or interesting, consider giving the repository a ⭐ on GitHub.
